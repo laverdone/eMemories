@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/main_screen" android:padding="0dp"
+    android:background="@color/accent">
+    <!-- Contenuto del diary presenti -->
+
+    <include layout="@layout/toolbar"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/content"
+        android:background="@color/accent"
+        android:paddingBottom="20dp">
+
+        <ListView
+            android:id="@+id/diaries"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:numColumns="auto_fit"
+            android:verticalSpacing="0dp"
+            android:horizontalSpacing="0dp"
+            android:stretchMode="none"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:scrollingCache="true"
+            android:animateLayoutChanges="true"
+            android:dividerHeight="0dp"
+            android:headerDividersEnabled="false"
+            android:padding="5dp"/>
+
+        <LinearLayout
+            android:id="@+id/fab_2"
+            android:layout_width="@dimen/fab_size"
+            android:layout_height="@dimen/fab_size"
+            android:layout_marginRight="20dp"
+            android:elevation="@dimen/fab_elevation"
+            android:background="@drawable/fab_background"
+            android:stateListAnimator="@anim/fab_anim"
+            android:layout_gravity="center_horizontal"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:padding="10dp">
+            >
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_action_edit"
+                android:duplicateParentState="true"
+                android:id="@+id/newDiary"
+                android:clickable="true"/>
+
+        </LinearLayout>
+
+        <!--<ImageButton
+            android:id="@+id/newDiary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/circle"
+            android:src="@drawable/ic_content_new"
+            android:clickable="true"
+            android:elevation="10dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignBottom="@id/diaries"
+            android:layout_marginBottom="32dp"
+            android:layout_marginRight="20dp"/>-->
+    </RelativeLayout>
+
+</LinearLayout>

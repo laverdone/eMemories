@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="textview_height">25dp</dimen>
+    <dimen name="textview_width">150dp</dimen>
+    <dimen name="sideBar">50dp</dimen>
+    <dimen name="font_size_date">65sp</dimen>
+    <dimen name="font_size">25sp</dimen>
+    <dimen name="status_bar">25dp</dimen>
+    <integer name="template_1">300</integer>
+    <integer name="template_2">350</integer>
+</resources>
