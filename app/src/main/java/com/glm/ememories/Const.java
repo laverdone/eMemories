@@ -45,7 +45,7 @@ public class Const {
     /**Sample Size Immagine for page preview*/
     public static final int SAMPLESIZEDIARY = 1;
     /**sample per le immagini da lavorare*/
-    public static final int WORKIZEIMAGE = 2;
+    public static final int WORKIZEIMAGE = 3;
     /**PagePreview extension*/
     public static final String PAGE_PREVIEW_EXT=".prw";
     /**Camera Image extension*/

@@ -500,7 +500,6 @@ public class DrawerWritePageActivity extends ActionBarActivity implements OnKeyL
 
     @Override
     protected void onActivityResult(final int requestCode, int resultCode, final Intent data) {
-        //TODO Selezionare il filtro da applicare
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.effectdialog);
@@ -982,6 +981,8 @@ public class DrawerWritePageActivity extends ActionBarActivity implements OnKeyL
         if(mImages==null) mImages = new Hashtable<Long, DiaryPicture>();
 
         if(oScaledSizeBmp!=null){
+            File tmpImgFile = new File(sPathImage+"/"+sImageName);
+            if(!tmpImgFile.exists()) return;
             BitmapFactory.Options options = new BitmapFactory.Options();
             //options.inSampleSize=Const.SAMPLESIZEIMAGE;
             options.inSampleSize=calculateInSampleSize();
@@ -1906,7 +1907,8 @@ public class DrawerWritePageActivity extends ActionBarActivity implements OnKeyL
             //mCurrentPage=DiaryHelper.factoryNewPageBuilder();
             //mCurrentPage.setPageOrientation(mPageOrientation);
             //mDiary=DiaryHelper.addPageToDiary(mDiary, mCurrentPage);//loadDiaryNewPage(true);
-
+            File tmpImgFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+            if(!tmpImgFile.exists()) return;
             ImageView oImage= new ImageView(DrawerWritePageActivity.this);
             oImage.setImageBitmap(BitmapFactoryHelper.decodeSampledBitmapFromFile(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT));
             oOldPage= oImage;
@@ -2168,6 +2170,9 @@ public class DrawerWritePageActivity extends ActionBarActivity implements OnKeyL
                     }
                 });
             }
+            File tmpImgFile = new File(sPathImage + "/" + sImageName);
+            if(!tmpImgFile.exists()) return false;
+
             /*bitmap della fotocamera in dimensione originale*/
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize=Const.SAMPLESIZEDIARY;
@@ -2354,6 +2359,8 @@ public class DrawerWritePageActivity extends ActionBarActivity implements OnKeyL
         /**Combina le due immagini per generare la photo effects*/
         private Bitmap combineImages(Bitmap scalatedPhoto, String preMadeEffect){
             try {
+                //File tmpImgFile = new File(getAssets().open("template/"+preMadeEffect+"/photo.png");
+                //if(!tmpImgFile.exists()) return null;
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize=1;//Const.WORKIZEIMAGE;
                 Bitmap bmpEffect = BitmapFactory.decodeStream(getAssets().open("template/"+preMadeEffect+"/photo.png"),null,options);
@@ -2446,7 +2453,7 @@ public class DrawerWritePageActivity extends ActionBarActivity implements OnKeyL
 
                 Cursor cursor = getContentResolver().query(imageFromGallery, null, null, null, null);
                 cursor.moveToFirst();
-                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                //int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
 
                 //Calcolo la rotazione dell'immagine
                 //mRotationAngle=getCameraPhotoOrientation(cursor.getString(idx));
@@ -2687,6 +2694,8 @@ public class DrawerWritePageActivity extends ActionBarActivity implements OnKeyL
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
+            File tmpImgFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+            if(!tmpImgFile.exists()) return;
 
             ImageView oImage= new ImageView(DrawerWritePageActivity.this);
             oImage.setImageBitmap(BitmapFactoryHelper.decodeSampledBitmapFromFile(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT));

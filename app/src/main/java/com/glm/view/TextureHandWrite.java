@@ -287,11 +287,12 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 	         	     mPaint.setStrokeWidth(mCurrentStrokeWidth);
 	         	     mPaint.setAntiAlias(true);
                     if(mDeleteMode){
+                        mPaint.setStrokeWidth(mCurrentStrokeWidth);
                         mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
                         mPaint.setColor(Color.DKGRAY);
                         //mOneShot=true;
-                        mPaint.setStyle(Paint.Style.FILL);
-                        mPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
+                        mPaint.setStyle(Paint.Style.STROKE);
+                        //mPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
                         mCanvas.drawPath(path,mPaint);
 
                     }
@@ -415,9 +416,9 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                          if(mDeleteMode){
                              //mOneShot=true;
                              path.close();
-                             mPaint.setStyle(Paint.Style.FILL);
+                             mPaint.setStyle(Paint.Style.STROKE);
                              mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-                             mPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
+                             //mPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
                              mCanvas.drawPath(path,mPaint);
                              ((DrawerWritePageActivity)getContext()).saveFromDeleted();
                          }
@@ -919,7 +920,6 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                 mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(), mMatrixPictureCanvas, mPaint);
 			}		
 		}
-        TextureHandWrite.this.invalidate();
 	}
     
 	
@@ -1710,13 +1710,16 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 			}
 
 			if(mCurrentDiary!=null && mContext!=null && mCurrentPage!=null){
-                //le vecchie path da usare in un task async
-                Bitmap immutable = BitmapFactoryHelper.decodeSampledBitmapFromFile(Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/"+mCurrentDiary.getDiaryID() + "/Pictures/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT,1);
-                if(immutable!=null){
-                    if(bmpPath!=null) bmpPath.recycle();
-                    bmpPath = immutable.copy(Bitmap.Config.ARGB_8888, true);
-                    immutable.recycle();
-                    immutable=null;
+                File tmpImgFile = new File(Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/"+mCurrentDiary.getDiaryID() + "/Pictures/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+                if(tmpImgFile.exists()) {
+                    //le vecchie path da usare in un task async
+                    Bitmap immutable = BitmapFactoryHelper.decodeSampledBitmapFromFile(Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + mCurrentDiary.getDiaryID() + "/Pictures/h" + mCurrentPage.getPageID() + Const.PAGE_PREVIEW_EXT, 1);
+                    if (immutable != null) {
+                        if (bmpPath != null) bmpPath.recycle();
+                        bmpPath = immutable.copy(Bitmap.Config.ARGB_8888, true);
+                        immutable.recycle();
+                        immutable = null;
+                    }
                 }
             }
 		    //Disegna la Data della pagina
@@ -2792,7 +2795,8 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 
             mAngle=mPictureToSave.getDiaryPictureRotation()+90;
             if(mAngle>360) mAngle = 0;
-
+            File tmpImg = new File(mPictureToSave.getDiaryImageURI());
+            if(!tmpImg.exists()) return false;
 			//Ruoto l'immagine originale e quella scalata
 			Bitmap immutable = BitmapFactory.decodeFile(mPictureToSave.getDiaryImageURI());
 			Bitmap mOrigianlImage=null;
@@ -2835,7 +2839,8 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 			//options.inSampleSize=Const.SAMPLESIZEIMAGE;
 			options.inSampleSize=calculateInSampleSize();
 			
-			
+			File tmpImgFile = new File(mFileName);
+            if(!tmpImgFile.exists()) return false;
 			mPictureToSave.setBitmapImage(BitmapFactory.decodeFile(mFileName, options));
 			return DiaryRepositoryHelper.updatePicturePosition(mContext, mPictureToSave);
 		}
