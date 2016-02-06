@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#795548</color>
+    <color name="colorPrimaryDark">#3E2723</color>
+    <color name="colorAccent">#A1887F</color>
+
+    <color name="black">#000000</color>
+    <color name="primary">#9E9E9E</color>
+    <color name="white">#ffffff</color>
+    <color name="traslucent">#29900000</color>
+
+    <color name="BluPrimaryColor">#30426F</color>
+    <color name="BluSecondaryAColor">#423172</color>
+    <color name="BluSecondaryBColor">#256164</color>
+    <color name="YellowComplemetayColor">#A6833C</color>
+
+    //Themes Color Bar
+    <color name="primaryTheme1">#009688</color>
+    <color name="primaryDarkTheme1">#004D40</color>
+    <color name="accentTheme1">#E0F2F1</color>
+
+    <color name="primaryTheme2">#795548</color>
+    <color name="primaryDarkTheme2">#3E2723</color>
+    <color name="accentTheme2">#EFEBE9</color>
+
+    <color name="primaryTheme3">#795548</color>
+    <color name="primaryDarkTheme3">#3E2723</color>
+    <color name="accentTheme3">#EFEBE9</color>
+
+    <color name="primaryTheme4">#FFC107</color>
+    <color name="primaryDarkTheme4">#FFF8E1</color>
+    <color name="accentTheme4">#FF6F00</color>
+
+    <color name="primaryTheme5">#9E9E9E</color>
+    <color name="primaryDarkTheme5">#FAFAFA</color>
+    <color name="accentTheme5">#212121</color>
+
+    <color name="primaryTheme6">#F44336</color>
+    <color name="primaryDarkTheme6">#FFEBEE</color>
+    <color name="accentTheme6">#B71C1C</color>
+
+    <color name="fab_color_1">#ff5252</color>
+    <color name="fab_color_1_muted">#ff8080</color>
+    <color name="fab_color_2">#9c27b0</color>
+    <color name="fab_color_2_muted">#a56ab0</color>
+</resources>

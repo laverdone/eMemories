@@ -1,0 +1,96 @@
+<RelativeLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="450dp" android:paddingTop="0dp" android:background="@android:color/transparent"
+    android:minHeight="300dp"
+    android:minWidth="450dp" android:layout_gravity="center" >
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:gravity="center|center_vertical">
+
+        <LinearLayout android:id="@+id/animation_layout_content"
+            android:layout_width="151dp"
+            android:layout_height="251dp"
+            android:orientation="vertical"
+            android:weightSum="1"
+            android:baselineAligned="false">
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:id="@+id/header"
+                android:background="@drawable/content_top"/>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/content"
+                android:background="@drawable/content_bg"
+                android:layout_weight="1" >
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/btnPortrain"
+                    android:src="@drawable/page_preview"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    android:text="@string/portrain"
+                    android:layout_marginBottom="10dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="20dp"
+                    android:background="@android:color/transparent"
+                    android:textColor="@color/black"
+                    android:layout_margin="10dp" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:id="@+id/footer"
+                android:background="@drawable/content_bottom"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="251dp"
+            android:layout_height="151dp"
+            android:orientation="vertical"
+
+            android:baselineAligned="false">
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:id="@+id/header1"
+                android:background="@drawable/content_top"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/content1"
+                android:background="@drawable/content_bg"
+                android:layout_weight="1" >
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/btnLandspace"
+                    android:src="@drawable/page_preview"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:text="@string/landspace"
+                    android:layout_gravity="center"
+                    android:background="@android:color/transparent"
+                    android:textColor="@color/black"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:id="@+id/footer1"
+                android:background="@drawable/content_bottom"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</RelativeLayout>

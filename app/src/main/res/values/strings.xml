@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">eMemories</string>
+    <string name="new_diary">New Diary</string>
+    <string name="open_diary">Open Diary</string>
+    <string name="about_diary">About</string>
+    <string name="empty_page">Empty Page</string>
+    <string name="save">Save</string>
+    <string name="edit">Sketch</string>
+    <string name="write">Write down</string>
+    <string name="photo">Take a Photo from Camera</string>
+    <string name="gallery">Take a Photo from Gallery</string>
+    <string name="auto">Auto Detect</string>
+    <string name="newpage">Add new page</string>
+    <string name="colorpicker">Color Picker</string>
+    <string name="strokewidth">Stroke Width</string>
+    <string name="wait">Please Wait</string>
+    <string name="ok">OK</string>
+    <string name="eraser">Eraser</string>
+    <string name="delete">Deleted</string>
+    <string name="portrain">Portrain</string>
+    <string name="landspace">Landspace</string>
+    <string name="deleteDiary">Are you sure do you want delete this diary?</string>
+    <string name="deletePage">Delete this page</string>
+    <string name="cannotdeletepage">Cannot Delete Page</string>
+    <string name="clear">Delete Sketch</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="dAttention">Attention</string>
+    <string name="dExit">Do you want to exit the Application?</string>
+    <string name="drawer_open">open</string>
+    <string name="drawer_close">close</string>
+    <string name="helpPage">Show Pages</string>
+    <string name="helpPageDesc">Swipe to right to show the pages preview and tap on it to switch to
+        another page.</string>
+    <string name="helpPhoto">Show Photo</string>
+    <string name="helpPhotoDesc">Tap on the photo to view in full screen.</string>
+    <string name="helpRotate">Rotate Photo</string>
+    <string name="helpRotateDesc">Swipe on the photo if you want to rotate it.</string>
+    <string name="helpDelete">Delete Photo</string>
+    <string name="helpDeleteDesc">Drag the photo to the margin bottom and it will deleted</string>
+    <string name="helpNext">Next Tip</string>
+    <string name="helpHide">Don\'t show again</string>
+    <string name="helpShow">Help</string>
+    <string name="exportpdf">Export PDF</string>
+    <string name="search">Search</string>
+    <string name="sharePage">Share</string>
+    <string name="settings_bg_color_dialog">Background Color</string>
+    <string name="settings_bg_color_confirm">Confirm</string>
+    <string name="settings_default_color_confirm">Confirm Color</string>
+    <string name="exportodf">Export ODF</string>
+    <string name="newuser">New User</string>
+    <string name="cloud">Cloud</string>
+    <string name="logout">Logout</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">Example action</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_ememories">Ememories</string>
+
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="app_support_mail">glmlabs2011@gmail.com</string>
+    <string name="title_activity_write">WriteActivity</string>
+
+</resources>
