@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@color/YellowComplemetayColor" android:state_pressed="true"/>
+    <item android:drawable="@color/YellowComplemetayColor" android:state_focused="true"/>
+    <item android:drawable="@color/YellowComplemetayColor" android:state_selected="true"/>
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="4dp" android:color="@color/BluSecondaryBColor" />
+
+            <corners android:radius="2dp" />
+
+            <gradient android:angle="270" android:endColor="@color/BluSecondaryAColor" android:startColor="@color/BluPrimaryColor" />
+        </shape>
+    </item>
+
+</selector>
