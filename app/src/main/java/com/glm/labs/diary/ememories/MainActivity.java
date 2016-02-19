@@ -2,6 +2,7 @@ package com.glm.labs.diary.ememories;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity
 
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.setCustomAnimations(R.anim.in_from_left, R.anim.out_to_left, R.anim.in_from_right, R.anim.out_to_right);
-                TemplateFragment newFragment = TemplateFragment.newInstance("","");
+                TemplateFragment newFragment = TemplateFragment.newInstance("", "");
 
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack so the user can navigate back
@@ -94,10 +95,9 @@ public class MainActivity extends AppCompatActivity
                 // Commit the transaction
                 transaction.commit();
                 view.setVisibility(View.INVISIBLE);
-                mPageState=1;
+                mPageState = 1;
             }
         });
-
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
     }
 
     @Override

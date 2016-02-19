@@ -147,6 +147,7 @@ public class WriteActivity extends AppCompatActivity
     private FloatingActionButton oColorPickerBtn;
     private Button oColorSelected;
     private ColorPickerView oColorPicker;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,9 +177,8 @@ public class WriteActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
-
         Intent intent = getIntent();
-		/*Template ID*/
+        /*Template ID*/
         int iTemplate = intent.getIntExtra("template", 0);
 		/*diario corrente id*/
         long mDiaryID = getIntent().getLongExtra("DiaryID", -1l);
@@ -190,8 +190,8 @@ public class WriteActivity extends AppCompatActivity
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
             statusBarHeight = getResources().getDimensionPixelSize(resourceId);
-        }else{
-            statusBarHeight =  (int) this.getResources().getDimension(R.dimen.status_bar);
+        } else {
+            statusBarHeight = (int) this.getResources().getDimension(R.dimen.status_bar);
         }
 
         mWidth = metrics.widthPixels;
@@ -199,25 +199,26 @@ public class WriteActivity extends AppCompatActivity
 
         this.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION);
 
-        if(mDiaryID==-1) {
-            mDiary= DiaryHelper.initNewDiary(iTemplate);
+        if (mDiaryID == -1) {
+            mDiary = DiaryHelper.initNewDiary(iTemplate);
             /**Goto Last Page*/
             Hashtable<Long, Page> mPages = (Hashtable<Long, Page>) mDiary.getDiaryPages();
             Map<Long, Page> sortedPages = new TreeMap<Long, Page>(mPages);
 
-            for(Page oPpage : sortedPages.values()){
+            for (Page oPpage : sortedPages.values()) {
                 mCurrentPage = oPpage;
             }
-            sortedPages=null;
+            sortedPages = null;
             loadDiary(false);
-        }else{
-            mDiary=new Diary();
+        } else {
+            mDiary = new Diary();
             mDiary.setDiaryID(mDiaryID);
             LoadDiaryTask oDiariesAsync = new LoadDiaryTask(getApplicationContext());
             oDiariesAsync.execute();
         }
 
-        Log.v(this.getClass().getCanonicalName(),"on Create WritePage");
+        Log.v(this.getClass().getCanonicalName(), "on Create WritePage");
+
 
         //this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
@@ -231,6 +232,16 @@ public class WriteActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(final int requestCode, int resultCode, final Intent data) {
+        /**
+         * VERY IMPORTANT FOR PREVENT SEG FAULT ON SOME DEVICES
+         *
+         * */
+        oSurface.freeBitmap();
+        oSurface.init(mDiary, mCurrentPage);
+        /**
+         * VERY IMPORTANT FOR PREVENT SEG FAULT ON SOME DEVICES
+         *
+         * */
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.effectdialog);
@@ -408,9 +419,11 @@ public class WriteActivity extends AppCompatActivity
                 SaveDiaryTask oSaveDiary1 = new SaveDiaryTask(this,false);
                 oSaveDiary1.execute();
 
+
                 takePhoto();
                 break;
             case R.id.gallery:
+
 
                 takeImageFromGallery();
                 break;
@@ -1387,11 +1400,12 @@ public class WriteActivity extends AppCompatActivity
     }
 
     private void backToHome(){
-        Intent newIntent = new Intent();
-        newIntent.setClass(this, MainActivity.class);
-        this.startActivity(newIntent);
-        this.finish();
-        System.gc();
+        //Intent newIntent = new Intent();
+        //newIntent.setClass(this, MainActivity.class);
+        //this.startActivity(newIntent);
+        //this.finish();
+        //System.gc();
+        startActivity(new Intent(WriteActivity.this, MainActivity.class));
     }
 
     /**
