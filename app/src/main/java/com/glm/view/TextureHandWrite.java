@@ -36,7 +36,7 @@ import com.glm.bean.Row;
 import com.glm.db.DiaryRepositoryHelper;
 
 import com.glm.labs.diary.ememories.Const;
-import com.glm.labs.diary.ememories.R;
+import com.glm.ememories.R;
 import com.glm.utilities.BitmapFactoryHelper;
 import com.glm.utilities.InputConnetionEM;
 
@@ -230,8 +230,6 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 		/**refresh page*/
 		drawTextOnSurface();
         requestFocus();
-
-
 	}
 
     VelocityTracker velocity = VelocityTracker.obtain();
@@ -289,12 +287,13 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                     if(mDeleteMode){
                         mPaint.setStrokeWidth(mCurrentStrokeWidth);
                         mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-                        mPaint.setColor(Color.DKGRAY);
+                        //mPaint.setColor(Color.DKGRAY);
                         //mOneShot=true;
                         mPaint.setStyle(Paint.Style.STROKE);
                         //mPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
                         mCanvas.drawPath(path,mPaint);
-
+                        init(mCurrentDiary,mCurrentPage);
+                        invalidate();
                     }
                     path.setmPaint(mPaint);
 	         	     
@@ -366,10 +365,24 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                          path.setmPaint(mPaint);
                      }
 
-                 	 path.quadTo(mPrevX, mPrevY, event.getX(), event.getY());
+                     path.quadTo(mPrevX, mPrevY, event.getX(), event.getY());
                      if(mDeleteMode){
+                         path.quadTo(mPrevX, mPrevY, event.getX(), event.getY());
+                         mCanvasPath.drawPath(path, mPaint);
+                         path = new HandWritePath();
+                         path.moveTo(event.getX(), event.getY());
+                         path.lineTo(event.getX(), event.getY());
+                         mPaint.setDither(true);
+                         mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+
+                         mPaint.setAntiAlias(true);
+                         path.setmPaint(mPaint);
                          mCanvas.drawPath(path,mPaint);
+                         init(mCurrentDiary,mCurrentPage);
+                         invalidate();
                      }
+
+
                      _graphics.add(path);
                      mCanvasPath.drawPath(path, mPaint);
                      mPrevX=event.getX();
@@ -421,6 +434,10 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                              //mPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
                              mCanvas.drawPath(path,mPaint);
                              //TODO ((DrawerWritePageActivity)getContext()).saveFromDeleted();
+
+                             saveHandWrite();
+                             init(mCurrentDiary,mCurrentPage);
+                             invalidate();
                          }
                          _graphics.add(path);
                          if(mCanvasPath!=null && path!=null) mCanvasPath.drawPath(path, mPaint);
@@ -503,6 +520,41 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 
              }
              return true;
+    }
+
+
+    private void saveHandWrite(){
+        File mFile=null;
+        FileOutputStream out = null;
+        String sPathImage="";
+        if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+            sPathImage=Const.EXTDIR+mContext.getPackageName()+"/"+mCurrentDiary.getDiaryID() + "/Pictures";
+        }else{
+            sPathImage=Const.INTERNALDIR+mContext.getPackageName()+"/"+mCurrentDiary.getDiaryID() + "/Pictures";
+        }
+
+        File dir = new File(sPathImage);
+
+        if(!dir.exists()) {
+            dir.mkdirs();
+        }
+        //Task async per salvare l'immagine.
+        Bitmap oBmp = getHandWritePath();
+        try {
+            if(oBmp!=null){
+                mFile = new File(sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+                out = new FileOutputStream(mFile);
+
+                oBmp.compress(Bitmap.CompressFormat.PNG, 90, out);
+                out.close();
+                out=null;
+                Log.v(this.getClass().getCanonicalName(),"saving hand write image: "+sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+            }else{
+                Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+            }
+        } catch (IOException e) {
+            Log.e(this.getClass().getCanonicalName(),"Error saving image");
+        }
     }
 
     /**
@@ -858,7 +910,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
               if(mTextBitmap!=null && mOneShot) canvas.drawBitmap(mTextBitmap, identityMatrix, null);
               if(mOneShot) mOneShot=false;
             }else{
-              //Questa bitmap contiene il backgroud
+              //Questa bitmap contiene il background
               if(mBitmapForPage !=null) canvas.drawBitmap(mBitmapForPage, identityMatrix, null);
               if(mCanvas!=null) mCanvas.drawPath(_graphics.get(_Initializer), _graphics.get(_Initializer).getmPaint());
               //Disegno lo spostamento dell'immagine

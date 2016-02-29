@@ -3,6 +3,7 @@ package com.glm.view;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.support.v7.widget.CardView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.glm.bean.Diary;
-import com.glm.labs.diary.ememories.R;
+import com.glm.ememories.R;
 
 
 import java.text.SimpleDateFormat;
@@ -43,12 +44,14 @@ public class Card extends LinearLayout {
         //AbsListView.LayoutParams vp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         //oCard.setLayoutParams(vp);
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-
+        Typeface tf = Typeface.createFromAsset(mContext.getAssets(), "template/"+diary.getDiaryTemplate()+"/font.ttf");
         TextView oTitle = (TextView) mView.findViewById(R.id.title);
         if(diary.getDiaryName()!=null){
             oTitle.setText("> "+diary.getDiaryName()+" "+sdf.format(diary.getDiaryDTCreation()));
+            oTitle.setTypeface(tf);
         }else{
             oTitle.setText("> "+mContext.getString(R.string.app_name)+" "+sdf.format(diary.getDiaryDTCreation()));
+            oTitle.setTypeface(tf);
         }
     }
 

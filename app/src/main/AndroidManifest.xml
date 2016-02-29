@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.glm.labs.diary.ememories">
+    package="com.glm.ememories">
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -30,7 +30,7 @@
         android:theme="@style/AppTheme"
         android:allowClearUserData="true" >
         <activity
-            android:name=".MainActivity"
+            android:name="com.glm.labs.diary.ememories.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTask"
@@ -51,8 +51,8 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".WriteActivity"
-            android:label="@string/title_activity_write"
+            android:name="com.glm.labs.diary.ememories.WriteActivity"
+            android:label="@string/app_name"
             android:autoRemoveFromRecents="true"
             android:clearTaskOnLaunch="true"
             android:hardwareAccelerated="true"

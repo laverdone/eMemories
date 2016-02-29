@@ -7,7 +7,7 @@ import android.os.Environment;
  * Created by gianluca on 02/02/16.
  */
 public class Const {
-    public final static boolean DEVELOPER_MODE=true;
+    public final static boolean DEVELOPER_MODE=false;
     /**altezza di base da cui poi scalare per le altre risoluzioni*/
     public static final int DEFAULT_HEIGTH=1920;
     /**larghezza di base da cui poi scalare per le altre risoluzioni*/
@@ -79,4 +79,6 @@ public class Const {
     public static final int colorTheme4 =  Color.parseColor("#FFC107");
     public static final int colorTheme5 =  Color.parseColor("#9E9E9E");
     public static final int colorTheme6 =  Color.parseColor("#F44336");
+    //public static final String ADS_APP_PACKAGE_NAME="com.glm.diary.ememories";
+    public static final String ADS_APP_PACKAGE_NAME="com.glm.diary.ememories";
 }

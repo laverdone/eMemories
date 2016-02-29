@@ -2,6 +2,7 @@ package com.glm.labs.diary.ememories.fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,8 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import com.glm.labs.diary.ememories.R;
+import com.glm.ememories.R;
 import com.glm.labs.diary.ememories.WriteActivity;
 
 
@@ -37,6 +40,13 @@ public class TemplateFragment extends Fragment {
     private ImageView mTemplate4;
     private ImageView mTemplate5;
     private ImageView mTemplate6;
+
+    private TextView mFontTemplate1;
+    private TextView mFontTemplate2;
+    private TextView mFontTemplate3;
+    private TextView mFontTemplate4;
+    private TextView mFontTemplate5;
+    private TextView mFontTemplate6;
     private OnFragmentInteractionListener mListener;
 
     public TemplateFragment() {
@@ -74,12 +84,37 @@ public class TemplateFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView =  inflater.inflate(R.layout.fragment_template, container, false);
-        ImageView mTemplate1 = (ImageView) rootView.findViewById(R.id.template1);
-        ImageView mTemplate2 = (ImageView) rootView.findViewById(R.id.template2);
-        ImageView mTemplate3 = (ImageView) rootView.findViewById(R.id.template3);
-        ImageView mTemplate4 = (ImageView) rootView.findViewById(R.id.template4);
-        ImageView mTemplate5 = (ImageView) rootView.findViewById(R.id.template5);
-        ImageView mTemplate6 = (ImageView) rootView.findViewById(R.id.template6);
+        LinearLayout mTemplate1 = (LinearLayout) rootView.findViewById(R.id.template1);
+        LinearLayout mTemplate2 = (LinearLayout) rootView.findViewById(R.id.template2);
+        LinearLayout mTemplate3 = (LinearLayout) rootView.findViewById(R.id.template3);
+        LinearLayout mTemplate4 = (LinearLayout) rootView.findViewById(R.id.template4);
+        LinearLayout mTemplate5 = (LinearLayout) rootView.findViewById(R.id.template5);
+        LinearLayout mTemplate6 = (LinearLayout) rootView.findViewById(R.id.template6);
+
+        mFontTemplate1       = (TextView) rootView.findViewById(R.id.FontTemplate1);
+        mFontTemplate2       = (TextView) rootView.findViewById(R.id.FontTemplate2);
+        mFontTemplate3       = (TextView) rootView.findViewById(R.id.FontTemplate3);
+        mFontTemplate4       = (TextView) rootView.findViewById(R.id.FontTemplate4);
+        mFontTemplate5       = (TextView) rootView.findViewById(R.id.FontTemplate5);
+        mFontTemplate6       = (TextView) rootView.findViewById(R.id.FontTemplate6);
+
+        Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), "template/1/font.ttf");
+        mFontTemplate1.setTypeface(tf);
+
+        tf = Typeface.createFromAsset(getActivity().getAssets(), "template/2/font.ttf");
+        mFontTemplate2.setTypeface(tf);
+
+        tf = Typeface.createFromAsset(getActivity().getAssets(), "template/3/font.ttf");
+        mFontTemplate3.setTypeface(tf);
+
+        tf = Typeface.createFromAsset(getActivity().getAssets(), "template/4/font.ttf");
+        mFontTemplate4.setTypeface(tf);
+
+        tf = Typeface.createFromAsset(getActivity().getAssets(), "template/5/font.ttf");
+        mFontTemplate5.setTypeface(tf);
+
+        tf = Typeface.createFromAsset(getActivity().getAssets(), "template/6/font.ttf");
+        mFontTemplate6.setTypeface(tf);
 
         mTemplate1.setOnClickListener(new View.OnClickListener() {
             @Override

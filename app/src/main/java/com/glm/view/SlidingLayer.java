@@ -48,7 +48,7 @@ package com.glm.view;
         import android.widget.FrameLayout;
         import android.widget.Scroller;
 
-        import com.glm.labs.diary.ememories.R;
+        import com.glm.ememories.R;
 
 
 public class SlidingLayer extends FrameLayout {

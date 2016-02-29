@@ -52,7 +52,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -67,6 +66,7 @@ import com.glm.bean.DiaryPicture;
 import com.glm.bean.Page;
 import com.glm.db.DiaryRepositoryHelper;
 import com.glm.db.Repository;
+import com.glm.ememories.R;
 import com.glm.utilities.BitmapFactoryHelper;
 import com.glm.utilities.DiaryHelper;
 import com.glm.utilities.PdfBuilder;
@@ -89,6 +89,10 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
+
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 public class WriteActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -219,7 +223,14 @@ public class WriteActivity extends AppCompatActivity
 
         Log.v(this.getClass().getCanonicalName(), "on Create WritePage");
 
-
+        if(getPackageName().equals(Const.ADS_APP_PACKAGE_NAME)){
+            AdView mAdView = (AdView) findViewById(R.id.adView);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.loadAd(adRequest);
+        }else{
+            AdView mAdView = (AdView) findViewById(R.id.adView);
+            mAdView.setVisibility(View.GONE);
+        }
         //this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
@@ -408,7 +419,7 @@ public class WriteActivity extends AppCompatActivity
                 oSurface.setPage(mCurrentPage);
 
                 oSurface.setColor(Color.BLACK);
-                oSurface.setStrokeWidth(mCurrentStrokeWidth*2);
+                oSurface.setStrokeWidth(mCurrentStrokeWidth*20);
                 oSurface.setDeleteMode(true);
                 break;
             case R.id.photo:
@@ -452,15 +463,7 @@ public class WriteActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
+        if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
 

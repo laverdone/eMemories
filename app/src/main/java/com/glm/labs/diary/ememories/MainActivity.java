@@ -25,12 +25,14 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.glm.ememories.R;
 import com.glm.labs.diary.ememories.fragment.DiariesFragment;
 import com.glm.labs.diary.ememories.fragment.TemplateFragment;
-import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, TemplateFragment.OnFragmentInteractionListener, DiariesFragment.OnListFragmentInteractionListener {
@@ -49,6 +51,8 @@ public class MainActivity extends AppCompatActivity
      */
     private GoogleApiClient client;
 
+    private DiariesFragment diaryFragment;
+    private TemplateFragment templateFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -85,11 +89,11 @@ public class MainActivity extends AppCompatActivity
 
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.setCustomAnimations(R.anim.in_from_left, R.anim.out_to_left, R.anim.in_from_right, R.anim.out_to_right);
-                TemplateFragment newFragment = TemplateFragment.newInstance("", "");
+                templateFragment = TemplateFragment.newInstance("", "");
 
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack so the user can navigate back
-                transaction.replace(R.id.main_content, newFragment);
+                transaction.replace(R.id.main_content, templateFragment);
                 transaction.addToBackStack(null);
 
                 // Commit the transaction
@@ -112,11 +116,11 @@ public class MainActivity extends AppCompatActivity
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.anim.in_from_left, R.anim.out_to_left, R.anim.in_from_right, R.anim.out_to_right);
-        DiariesFragment newFragment = DiariesFragment.newInstance(1);
+        diaryFragment = DiariesFragment.newInstance(1);
 
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack so the user can navigate back
-        transaction.replace(R.id.main_content, newFragment);
+        transaction.replace(R.id.main_content, diaryFragment);
         transaction.addToBackStack(null);
 
         // Commit the transaction
@@ -126,6 +130,7 @@ public class MainActivity extends AppCompatActivity
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
 
     }
 
@@ -168,18 +173,22 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
+        if (id == R.id.nav_share) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id="+getPackageName());
+            intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "The charm of paper carried on tablets! Write, photographer and draws\n" +
+                    "\n" +
+                    "eMemories allows you to make your trips unforgettable and  magic moments.\n" +
+                    "\n");
+            startActivity(Intent.createChooser(intent, "Share"));
         } else if (id == R.id.nav_send) {
-
+            Intent email = new Intent(Intent.ACTION_SEND);
+            email.putExtra(Intent.EXTRA_EMAIL, new String[]{"glmlabs2011@gmail.com"});
+            email.putExtra(Intent.EXTRA_SUBJECT, "SUPPORT - eMemories");
+            email.putExtra(Intent.EXTRA_TEXT, "Request support for "+getPackageName());
+            email.setType("message/rfc822");
+            startActivity(Intent.createChooser(email, "Choose an Email client :"));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -196,6 +205,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
+/*
 
     @Override
     public void onStart() {
@@ -212,7 +222,7 @@ public class MainActivity extends AppCompatActivity
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.glm.labs.diary.ememories/http/host/path")
+                Uri.parse("android-app://com.glm.ememories/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction);
     }
@@ -231,11 +241,12 @@ public class MainActivity extends AppCompatActivity
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.glm.labs.diary.ememories/http/host/path")
+                Uri.parse("android-app://com.glm.ememories/http/host/path")
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
     }
+*/
 
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -249,11 +260,11 @@ public class MainActivity extends AppCompatActivity
                 //Goto Home
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.setCustomAnimations(R.anim.in_from_left, R.anim.out_to_left, R.anim.in_from_right, R.anim.out_to_right);
-                DiariesFragment newFragment = DiariesFragment.newInstance(1);
+                diaryFragment = DiariesFragment.newInstance(1);
 
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack so the user can navigate back
-                transaction.replace(R.id.main_content, newFragment);
+                transaction.replace(R.id.main_content, diaryFragment);
                 transaction.addToBackStack(null);
 
                 // Commit the transaction
@@ -350,8 +361,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
                 if (i == KeyEvent.KEYCODE_ENTER) {
-                    //DiariesSearchAsyncTask oSearch = new DiariesSearchAsyncTask(txtSearch.getText().toString());
-                    //oSearch.execute();
+                    diaryFragment.search(txtSearch.getText().toString());
+
                     dialog.dismiss();
                 }
                 return false;
@@ -361,8 +372,7 @@ public class MainActivity extends AppCompatActivity
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //DiariesSearchAsyncTask oSearch = new DiariesSearchAsyncTask(txtSearch.getText().toString());
-                //oSearch.execute();
+                diaryFragment.search(txtSearch.getText().toString());
                 dialog.dismiss();
             }
         });

@@ -34,10 +34,12 @@ import com.glm.bean.Diary;
 import com.glm.bean.Page;
 import com.glm.db.DiaryRepositoryHelper;
 import com.glm.labs.diary.ememories.Const;
-import com.glm.labs.diary.ememories.R;
+import com.glm.ememories.R;
 import com.glm.labs.diary.ememories.WriteActivity;
 import com.glm.utilities.Rate;
 import com.glm.view.Card;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -117,6 +119,17 @@ public class DiariesFragment extends Fragment {
 
         mGridview = (ListView) view.findViewById(R.id.diaries);
 
+        if(getActivity().getPackageName().equals(Const.ADS_APP_PACKAGE_NAME)){
+            AdView mAdView = (AdView) view.findViewById(R.id.adView);
+            AdRequest adRequest = new AdRequest.Builder().build();
+//            mAdView.setAdUnitId(getString(R.string.banner_ad_unit_id));
+//            mAdView.setAdSize(AdSize.SMART_BANNER);
+            mAdView.loadAd(adRequest);
+        }else{
+            AdView mAdView = (AdView) view.findViewById(R.id.adView);
+            mAdView.setVisibility(View.GONE);
+        }
+
         DiariesAsyncTask oDiariesAsync = new DiariesAsyncTask();
         oDiariesAsync.execute();
 
@@ -139,6 +152,11 @@ public class DiariesFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public void search(String search) {
+        DiariesSearchAsyncTask oSearch = new DiariesSearchAsyncTask(search);
+        oSearch.execute();
     }
 
     /**
@@ -327,8 +345,11 @@ public class DiariesFragment extends Fragment {
                                 @Override
                                 public void onClick(View v) {
 
-                                    ActivityOptions options = ActivityOptions.makeScaleUpAnimation(oCard, 0,
-                                            0, oCard.getWidth(), oCard.getHeight());
+                                    ActivityOptions options = null;
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                                        options = ActivityOptions.makeScaleUpAnimation(oCard, 0,
+                                                0, oCard.getWidth(), oCard.getHeight());
+                                    }
                                     Intent newIntent = new Intent();
                                     newIntent.putExtra("template", diary.getDiaryTemplate());
                                     newIntent.putExtra("DiaryID", diary.getDiaryID());
@@ -529,18 +550,29 @@ public class DiariesFragment extends Fragment {
                     mContext.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ImageView imageView;// = (ImageView) mPagePreview.findViewById(R.id.imgPreview);
-                            imageView = new ImageView(mContext);
+
                             Card oCard = new Card(mContext);
                             oCard.getPreview().setImageBitmap(pageBmp);
-                            imageView.setOnClickListener(new View.OnClickListener() {
+                            oCard.getMainLayout().setOnClickListener(new View.OnClickListener() {
 
                                 @Override
                                 public void onClick(View v) {
                                     Intent newIntent = new Intent();
                                     newIntent.putExtra("CurrentPage", page.getPageID());
                                     newIntent.putExtra("DiaryID", page.getDiaryID());
-                                    newIntent.setClass(mContext, null);
+                                    newIntent.setClass(mContext, WriteActivity.class);
+                                    mContext.startActivity(newIntent);
+                                    //mContext.finish();
+                                }
+                            });
+                            oCard.getPreview().setOnClickListener(new View.OnClickListener() {
+
+                                @Override
+                                public void onClick(View v) {
+                                    Intent newIntent = new Intent();
+                                    newIntent.putExtra("CurrentPage", page.getPageID());
+                                    newIntent.putExtra("DiaryID", page.getDiaryID());
+                                    newIntent.setClass(mContext, WriteActivity.class);
                                     mContext.startActivity(newIntent);
                                     //mContext.finish();
                                 }

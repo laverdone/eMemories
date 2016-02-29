@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.glm.labs.diary.ememories.R;
+import com.glm.ememories.R;
 
 
 /**Adapter per la gestione della lista della spase sia raggruppata che espansa*/

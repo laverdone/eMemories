@@ -68,7 +68,7 @@ import com.glm.bean.Row;
 import com.glm.db.DiaryRepositoryHelper;
 
 import com.glm.labs.diary.ememories.Const;
-import com.glm.labs.diary.ememories.R;
+import com.glm.ememories.R;
 import com.glm.labs.diary.ememories.WriteActivity;
 import com.glm.utilities.BitmapFactoryHelper;
 import com.glm.utilities.InputConnetionEM;

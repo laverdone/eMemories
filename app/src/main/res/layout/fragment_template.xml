@@ -13,7 +13,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:showDividers="none"
-            android:padding="10dp"
+            android:padding="0dp"
+
             android:background="@android:color/transparent">
 
             <android.support.v7.widget.CardView
@@ -21,19 +22,28 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp">
+                android:layout_marginRight="10dp"
+                android:elevation="@dimen/cardview_default_elevation">
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/template1"
+                    android:clickable="true">
                     <android.support.v7.widget.Toolbar
                         android:layout_width="match_parent"
-                        android:layout_height="30dp"/>
-
+                        android:layout_height="30dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="the black fox"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:id="@+id/FontTemplate1"/>
+                    </android.support.v7.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
-                        android:id="@+id/template1"
+
                         android:background="@mipmap/cover1"/>
                     <View
                         android:layout_width="wrap_content"
@@ -53,18 +63,27 @@
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp">
+                android:layout_marginRight="10dp"
+                android:elevation="@dimen/cardview_default_elevation">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/template2"
+                    android:clickable="true">
                     <android.support.v7.widget.Toolbar
                         android:layout_width="match_parent"
-                        android:layout_height="30dp"/>
+                        android:layout_height="30dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="the black fox"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:id="@+id/FontTemplate2"/>
+                    </android.support.v7.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
-                        android:id="@+id/template2"
                         android:background="@mipmap/cover2"/>
                     <View
                         android:layout_width="wrap_content"
@@ -84,18 +103,28 @@
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp">
+                android:layout_marginRight="10dp"
+                android:elevation="@dimen/cardview_default_elevation"
+                >
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/template3"
+                    android:clickable="true">
                     <android.support.v7.widget.Toolbar
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"/>
+                        android:layout_height="30dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="the black fox"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:id="@+id/FontTemplate3"/>
+                    </android.support.v7.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
-                        android:id="@+id/template3"
                         android:background="@mipmap/cover3"/>
                     <View
                         android:layout_width="wrap_content"
@@ -115,18 +144,27 @@
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp">
+                android:layout_marginRight="10dp"
+                android:elevation="@dimen/cardview_default_elevation">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/template4"
+                    android:clickable="true">
                     <android.support.v7.widget.Toolbar
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"/>
+                        android:layout_height="30dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="the black fox"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:id="@+id/FontTemplate4"/>
+                    </android.support.v7.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
-                        android:id="@+id/template4"
                         android:background="@mipmap/cover4"/>
                     <View
                         android:layout_width="wrap_content"
@@ -146,18 +184,27 @@
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp">
+                android:layout_marginRight="10dp"
+                android:elevation="@dimen/cardview_default_elevation">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/template5"
+                    android:clickable="true">
                     <android.support.v7.widget.Toolbar
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"/>
+                        android:layout_height="30dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="the black fox"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:id="@+id/FontTemplate5"/>
+                    </android.support.v7.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
-                        android:id="@+id/template5"
                         android:background="@mipmap/cover5"/>
                     <View
                         android:layout_width="wrap_content"
@@ -177,18 +224,27 @@
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp">
+                android:layout_marginRight="10dp"
+                android:elevation="@dimen/cardview_default_elevation">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/template6"
+                    android:clickable="true">
                     <android.support.v7.widget.Toolbar
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"/>
+                        android:layout_height="30dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="the black fox"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:id="@+id/FontTemplate6"/>
+                    </android.support.v7.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
-                        android:id="@+id/template6"
                         android:background="@mipmap/cover6"/>
                     <View
                         android:layout_width="wrap_content"
@@ -204,4 +260,5 @@
 
         </LinearLayout>
     </ScrollView>
+
 </FrameLayout>
