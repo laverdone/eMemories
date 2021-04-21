@@ -87,6 +87,38 @@ public class DiaryRepositoryHelper {
 		return mRepository.saveCurrentPage(pageToDump);
 	}
 	/**
+	 * Salva la HandWrite della Pagina Corrente
+	 *
+	 * */
+	public static Boolean dumpHandWritePage(Context context, Page pageToDump,byte[] imageHW) {
+		mContext=context;
+		mRepository = new Repository(mContext);
+		Log.v(DiaryRepositoryHelper.class.getClass().getCanonicalName(),"dumpHandWritePage");
+		return mRepository.saveCurrentHandWritePage(pageToDump,imageHW);
+	}
+
+	/**
+	 * Salva l'anteprima della Pagina Corrente
+	 *
+	 * */
+	public static Boolean dumpPagePreviewPage(Context context, Page pageToDump, byte[] imageHW) {
+		mContext=context;
+		mRepository = new Repository(mContext);
+		Log.v(DiaryRepositoryHelper.class.getClass().getCanonicalName(),"dumpPagePreviewPage");
+		return mRepository.saveCurrentPagePreviewPage(pageToDump,imageHW);
+	}
+
+	/**
+	 * Salva la HandWrite della Pagina Corrente
+	 *
+	 * */
+	public static Boolean dumpPageImage(Context context, DiaryPicture oPicture,byte[] imageHW) {
+		mContext=context;
+		mRepository = new Repository(mContext);
+		Log.v(DiaryRepositoryHelper.class.getClass().getCanonicalName(),"################dumpPageImage###########");
+		return mRepository.saveDiaryPicturePage(oPicture,imageHW);
+	}
+	/**
 	 * Cancella un'immagine dal DB
 	 * 
 	 * */
@@ -160,4 +192,6 @@ public class DiaryRepositoryHelper {
         mRepository = new Repository(mContext);
         return mRepository.searchText(search);
     }
+
+
 }

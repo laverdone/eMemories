@@ -1,23 +1,28 @@
 package com.glm.labs.diary.ememories;
 
+import android.Manifest;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.appcompat.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -28,11 +33,9 @@ import android.widget.EditText;
 import com.glm.ememories.R;
 import com.glm.labs.diary.ememories.fragment.DiariesFragment;
 import com.glm.labs.diary.ememories.fragment.TemplateFragment;
-import com.google.android.gms.appindexing.AppIndex;
+//import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, TemplateFragment.OnFragmentInteractionListener, DiariesFragment.OnListFragmentInteractionListener {
@@ -53,6 +56,7 @@ public class MainActivity extends AppCompatActivity
 
     private DiariesFragment diaryFragment;
     private TemplateFragment templateFragment;
+    private Context mContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -70,7 +74,31 @@ public class MainActivity extends AppCompatActivity
                     .penaltyDeath()
                     .build());
         }
+        mContext=this;
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(mContext,
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_PHONE_STATE,Manifest.permission.CAMERA,Manifest.permission.VIBRATE},
+                        Const.PERMISSION_WRITE_EXTERNAL_STORAGE_CODE);
+
+
+            }
+
+
+            if (ActivityCompat.checkSelfPermission(mContext,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_PHONE_STATE,Manifest.permission.CAMERA,Manifest.permission.VIBRATE},
+                        Const.PERMISSION_WRITE_EXTERNAL_STORAGE_CODE);
+
+            }
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -80,7 +108,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, R.string.choose_template, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
                 //Bundle args = new Bundle();
@@ -129,7 +157,7 @@ public class MainActivity extends AppCompatActivity
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        //client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
 
     }
@@ -252,8 +280,8 @@ public class MainActivity extends AppCompatActivity
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if(mPageState==0) {
-                onBackPressed();
                 exitByBackKey();
+                onBackPressed();
                 return true;
             }else if(mPageState==1){
                 onBackPressed();

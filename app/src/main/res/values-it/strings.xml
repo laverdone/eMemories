@@ -56,4 +56,5 @@
     <string name="settings_bg_color_confirm">Conferma</string>
     <string name="settings_bg_color_dialog">Colore di Sfondo</string>
     <string name="settings_default_color_confirm">Conferma Colore</string>
+    <string name="choose_template">Scegli quello che ti piace</string>
 </resources>

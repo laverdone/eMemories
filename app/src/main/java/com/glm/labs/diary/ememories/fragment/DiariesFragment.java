@@ -16,23 +16,21 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AlertDialog;
+
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.glm.bean.Diary;
 import com.glm.bean.Page;
 import com.glm.db.DiaryRepositoryHelper;
+import com.glm.db.Repository;
 import com.glm.labs.diary.ememories.Const;
 import com.glm.ememories.R;
 import com.glm.labs.diary.ememories.WriteActivity;
@@ -274,8 +272,8 @@ public class DiariesFragment extends Fragment {
                     });
                 }
             } catch (RuntimeException e) {
-                Log.e(getClass().getCanonicalName(), "RUNTIME ERROR Skyp");
-                e.printStackTrace();
+                Log.e(getClass().getCanonicalName(), "Looper.getMainLooper().prepare() Skyp");
+                //e.printStackTrace();
             }
             Log.v(getClass().getCanonicalName(), "Loading diaries");
 
@@ -424,53 +422,37 @@ public class DiariesFragment extends Fragment {
         }
 
 
-        /***
-         * RITORNA LA PRIMA PAGINA DEL DIARIO COME ANTEPRIMA
-         */
-        private Bitmap getFirstPageWithCover(Diary currentDiary) {
-            String sDiaryPreviewImage;
-            Hashtable<Long, Page> mPages = currentDiary.getDiaryPages();
-            if (mPages == null) return null;
-            Map<Long, Page> sortedPages = new TreeMap<Long, Page>(mPages);
-            long mLastPageID = 0;
-            for (Page oPpage : sortedPages.values()) {
-                mLastPageID = oPpage.getPageID();
-            }
-            sortedPages = null;
-            Bitmap cs = Bitmap.createBitmap(mCover.getWidth(), mCover.getHeight(), Bitmap.Config.ARGB_8888);
 
-            sDiaryPreviewImage = Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + currentDiary.getDiaryID() + "/Pictures/" + mLastPageID + Const.CAMERA_PREVIEW_EXT;
-
-            Bitmap page = BitmapFactory.decodeFile(sDiaryPreviewImage);
-            Bitmap preview = null; //BitmapFactoryHelper.decodeSampledBitmapFromFile(sDiaryPreviewImage,7);
-            if (page != null) {
-                preview = Bitmap.createScaledBitmap(page, (int) (mCover.getWidth() / 1.4), (int) (mCover.getHeight() / 1.2), true);
-            }
-
-            Canvas comboImage = new Canvas(cs);
-
-            comboImage.drawBitmap(mCover, 0f, 0f, null);
-            if (preview != null)
-                comboImage.drawBitmap(preview, (mCover.getWidth() - preview.getWidth()) / 2, (mCover.getHeight() - preview.getHeight()) / 2, null);
-            return cs;
-        }
 
         /***
          * RITORNA LA PRIMA PAGINA DEL DIARIO COME ANTEPRIMA
          */
         private Bitmap getFirstPage(Diary currentDiary) {
+            Diary mDiary=null;
+            Repository mRepository=null;
+            mRepository = new Repository(mContext);
+            mDiary=mRepository.reloadDiary(currentDiary);
+
             String sDiaryPreviewImage;
-            Hashtable<Long, Page> mPages = currentDiary.getDiaryPages();
+            Hashtable<Long, Page> mPages = mDiary.getDiaryPages();
+            Page mLastPage=null;
             if (mPages == null) return null;
             Map<Long, Page> sortedPages = new TreeMap<Long, Page>(mPages);
             long mLastPageID = 0;
             for (Page oPpage : sortedPages.values()) {
                 mLastPageID = oPpage.getPageID();
+                mLastPage = oPpage;
+            }
+            Bitmap page = null;
+            if(mLastPage.getByteImagePreviewPage()!=null){
+                Bitmap bmp = BitmapFactory.decodeByteArray(mLastPage.getByteImagePreviewPage(), 0, mLastPage.getByteImagePreviewPage().length);
+                page = bmp.copy(Bitmap.Config.ARGB_8888, true);
             }
 
-            sDiaryPreviewImage = Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + currentDiary.getDiaryID() + "/Pictures/" + mLastPageID + Const.CAMERA_PREVIEW_EXT;
 
-            Bitmap page = BitmapFactory.decodeFile(sDiaryPreviewImage);
+            //sDiaryPreviewImage = Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + currentDiary.getDiaryID() + "/Pictures/" + mLastPageID + Const.CAMERA_PREVIEW_EXT;
+
+            //Bitmap page = BitmapFactory.decodeFile(sDiaryPreviewImage);
 
             Bitmap preview = null; //BitmapFactoryHelper.decodeSampledBitmapFromFile(sDiaryPreviewImage,7);
             if (page != null) {
@@ -537,9 +519,10 @@ public class DiariesFragment extends Fragment {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inSampleSize = mCalculateInSampleSize;
 
-                    String sDiaryPreviewImage = Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + page.getDiaryID() + "/Pictures/" + page.getPageID() + Const.CAMERA_PREVIEW_EXT;
+                    //String sDiaryPreviewImage = Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + page.getDiaryID() + "/Pictures/" + page.getPageID() + Const.CAMERA_PREVIEW_EXT;
 
-                    final Bitmap pageBmp = BitmapFactory.decodeFile(sDiaryPreviewImage);
+                    final Bitmap pageBmp = BitmapFactory.decodeByteArray(page.getByteImagePreviewPage(),0,page.getByteImagePreviewPage().length);
+                            //BitmapFactory.decodeFile(sDiaryPreviewImage);
 
                     //Immagine Corrente per il diario
 

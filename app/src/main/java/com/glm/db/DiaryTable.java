@@ -14,6 +14,8 @@ public interface DiaryTable extends BaseColumns {
 	String DIARYID = "diaryid";
 	
 	String DIARYNAME = "diaryname";
+
+	String DIARYPREVIEW = "diarypreview";
 	
 	String DIARYTEMPLATE = "diarytemplate";
 	
@@ -23,7 +25,7 @@ public interface DiaryTable extends BaseColumns {
 
     String CLOUDID = "cloudid";
 	
-	String[] COLUMNS = new String[] {DIARYID, DIARYNAME, DIARYTEMPLATE, DIARYDTCREATION, DIARYDTMODIFY,CLOUDID};
+	String[] COLUMNS = new String[] {DIARYID, DIARYNAME, DIARYPREVIEW, DIARYTEMPLATE, DIARYDTCREATION, DIARYDTMODIFY,CLOUDID};
 
 	
 }

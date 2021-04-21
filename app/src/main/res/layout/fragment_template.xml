@@ -17,7 +17,7 @@
 
             android:background="@android:color/transparent">
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
@@ -30,7 +30,7 @@
                     android:orientation="vertical"
                     android:id="@+id/template1"
                     android:clickable="true">
-                    <android.support.v7.widget.Toolbar
+                    <androidx.appcompat.widget.Toolbar
                         android:layout_width="match_parent"
                         android:layout_height="30dp">
                         <TextView
@@ -39,7 +39,7 @@
                             android:text="the black fox"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:id="@+id/FontTemplate1"/>
-                    </android.support.v7.widget.Toolbar>
+                    </androidx.appcompat.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
@@ -55,9 +55,9 @@
                         android:background="@android:drawable/ic_menu_send"
                         android:layout_gravity="end"/>
             </LinearLayout>
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
@@ -71,7 +71,7 @@
                     android:orientation="vertical"
                     android:id="@+id/template2"
                     android:clickable="true">
-                    <android.support.v7.widget.Toolbar
+                    <androidx.appcompat.widget.Toolbar
                         android:layout_width="match_parent"
                         android:layout_height="30dp">
                         <TextView
@@ -80,7 +80,7 @@
                             android:text="the black fox"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:id="@+id/FontTemplate2"/>
-                    </android.support.v7.widget.Toolbar>
+                    </androidx.appcompat.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
@@ -95,9 +95,9 @@
                         android:background="@android:drawable/ic_menu_send"
                         android:layout_gravity="end"/>
                 </LinearLayout>
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
@@ -112,7 +112,7 @@
                     android:orientation="vertical"
                     android:id="@+id/template3"
                     android:clickable="true">
-                    <android.support.v7.widget.Toolbar
+                    <androidx.appcompat.widget.Toolbar
                         android:layout_width="match_parent"
                         android:layout_height="30dp">
                         <TextView
@@ -121,7 +121,7 @@
                             android:text="the black fox"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:id="@+id/FontTemplate3"/>
-                    </android.support.v7.widget.Toolbar>
+                    </androidx.appcompat.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
@@ -136,9 +136,9 @@
                         android:background="@android:drawable/ic_menu_send"
                         android:layout_gravity="end"/>
                 </LinearLayout>
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
@@ -152,7 +152,7 @@
                     android:orientation="vertical"
                     android:id="@+id/template4"
                     android:clickable="true">
-                    <android.support.v7.widget.Toolbar
+                    <androidx.appcompat.widget.Toolbar
                         android:layout_width="match_parent"
                         android:layout_height="30dp">
                         <TextView
@@ -161,7 +161,7 @@
                             android:text="the black fox"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:id="@+id/FontTemplate4"/>
-                    </android.support.v7.widget.Toolbar>
+                    </androidx.appcompat.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
@@ -176,9 +176,9 @@
                         android:background="@android:drawable/ic_menu_send"
                         android:layout_gravity="end"/>
                 </LinearLayout>
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
@@ -192,7 +192,7 @@
                     android:orientation="vertical"
                     android:id="@+id/template5"
                     android:clickable="true">
-                    <android.support.v7.widget.Toolbar
+                    <androidx.appcompat.widget.Toolbar
                         android:layout_width="match_parent"
                         android:layout_height="30dp">
                         <TextView
@@ -201,7 +201,7 @@
                             android:text="the black fox"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:id="@+id/FontTemplate5"/>
-                    </android.support.v7.widget.Toolbar>
+                    </androidx.appcompat.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
@@ -216,9 +216,9 @@
                         android:background="@android:drawable/ic_menu_send"
                         android:layout_gravity="end"/>
                 </LinearLayout>
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
@@ -232,7 +232,7 @@
                     android:orientation="vertical"
                     android:id="@+id/template6"
                     android:clickable="true">
-                    <android.support.v7.widget.Toolbar
+                    <androidx.appcompat.widget.Toolbar
                         android:layout_width="match_parent"
                         android:layout_height="30dp">
                         <TextView
@@ -241,7 +241,7 @@
                             android:text="the black fox"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:id="@+id/FontTemplate6"/>
-                    </android.support.v7.widget.Toolbar>
+                    </androidx.appcompat.widget.Toolbar>
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
@@ -256,7 +256,7 @@
                         android:background="@android:drawable/ic_menu_send"
                         android:layout_gravity="end"/>
                 </LinearLayout>
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
         </LinearLayout>
     </ScrollView>

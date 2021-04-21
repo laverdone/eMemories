@@ -59,7 +59,7 @@ public class Repository extends DBAdapter{
 			
 			close();
 			//Chiudo il DB
-			mResult = true;
+			//mResult = true;
 			if (mResult){
 				Log.v(this.getClass().getCanonicalName(), "Dump diary success");
 			}
@@ -103,6 +103,8 @@ public class Repository extends DBAdapter{
 			Page mPage = diaryPages.get(mLastPageID);
 			mPageTable.put(PagesTable.DIARYID, mPage.getDiaryID());
 			mPageTable.put(PagesTable.PAGEID, mPage.getPageID());
+			mPageTable.put(PagesTable.PAGEHANDWRITE, mPage.getByteImageHW());
+			mPageTable.put(PagesTable.PAGEPREVIEW, mPage.getByteImagePreviewPage());
 			mPageTable.put(PagesTable.PAGENUMBER, mPage.getPageNumber());
 			mPageTable.put(PagesTable.PAGELONG, mPage.getPageLong());
 			mPageTable.put(PagesTable.PAGELAT, mPage.getPageLat());
@@ -139,9 +141,9 @@ public class Repository extends DBAdapter{
 
 	/**
 	 * inserisco le immagini per la pagina passata nel DB
-	 * @param mDB 
-	 * @param PageCurl pagina a cui le immagini sono legate.
-	 * 
+	 * @param mDB
+	 * @param mPage pagina a cui le immagini sono legate.
+	 *
 	 * */
 	private boolean savePageImages(SQLiteDatabase mDB, Page mPage) {
 		if(mPage.getDiaryImage()==null) return true;
@@ -154,6 +156,7 @@ public class Repository extends DBAdapter{
 			mImageTable.put(PictureTable.DIARYID, mPage.getDiaryID());
 			mImageTable.put(PictureTable.PAGEID, mDiaryPicture.getPageID());
 			mImageTable.put(PictureTable.PICTUREID, mDiaryPicture.getDiaryPictureID());
+			mImageTable.put(PictureTable.PICTUREPREVIEW, mDiaryPicture.getByteImage());
 			mImageTable.put(PictureTable.PICTUREH, mDiaryPicture.getDiaryPictureH());
 			mImageTable.put(PictureTable.PICTUREW, mDiaryPicture.getDiaryPictureW());
 			mImageTable.put(PictureTable.PICTUREX, mDiaryPicture.getDiaryPictureX());
@@ -185,7 +188,7 @@ public class Repository extends DBAdapter{
 	/**
 	 * inserisco le righe per la pagina passata nel DB
 	 * @param mDB 
-	 * @param PageCurl pagina a cui le righe sono legate.
+	 * @param mPage pagina a cui le righe sono legate.
 	 * 
 	 * */
 	private boolean savePageRows(SQLiteDatabase mDB, Page mPage) {
@@ -301,8 +304,8 @@ public class Repository extends DBAdapter{
 	/**
 	 * Carica le pagine per il diario passato
 	 * 
-	 * @param boolean loadRow indica se caricare o no le roghe della pagina
-	 * @param boolean loadOnePage indica se di caricare solo una pagina del diario
+	 * @param  loadRow indica se caricare o no le roghe della pagina
+	 * @param  loadOnePage indica se di caricare solo una pagina del diario
 	 * */
 	private Diary loadPages(Diary currentDiary,boolean loadRow, boolean loadOnePage,boolean loadImages) {
 		Hashtable<Long, Page> mPages = new Hashtable<Long, Page>();
@@ -314,6 +317,8 @@ public class Repository extends DBAdapter{
 			Page page = new Page();
 			page.setDiaryID(currentDiary.getDiaryID());
 			page.setPageID(oCursor.getLong(oCursor.getColumnIndex(PagesTable.PAGEID)));
+			page.setByteImageHW(oCursor.getBlob(oCursor.getColumnIndex(PagesTable.PAGEHANDWRITE)));
+			page.setByteImagePreviewPage(oCursor.getBlob(oCursor.getColumnIndex(PagesTable.PAGEPREVIEW)));
 			page.setPageAlt(oCursor.getDouble(oCursor.getColumnIndex(PagesTable.PAGEALT)));
 			page.setPageLat(oCursor.getDouble(oCursor.getColumnIndex(PagesTable.PAGELAT)));
 			page.setPageLong(oCursor.getDouble(oCursor.getColumnIndex(PagesTable.PAGELONG)));
@@ -380,14 +385,28 @@ public class Repository extends DBAdapter{
 		
 		Hashtable<Long, DiaryPicture> mPictures = new Hashtable<Long, DiaryPicture>();
 		if(page==null) return null;
+		//Aggiungo la HandWrite della pagina alle immagini
+		DiaryPicture picture = new DiaryPicture();
+		picture.setPageID(page.getPageID());
+		picture.setDiaryPictureX(0);
+		picture.setDiaryPictureY(0);
+		picture.setDiaryPictureW(1000);
+		picture.setDiaryPictureH(1000);
+		picture.setDiaryPictureRotation(0);
+		picture.setDiaryImageURI(null);
+		picture.setDiaryHandImage(true);
+		picture.setByteImage(page.getByteImageHW());
+		mPictures.put(picture.getDiaryPictureID(), picture);
+		//Fine Aggiungo la HandWrite della pagina alle immagini
 		Cursor oCursor = getmDb().query(PictureTable.TABLE_NAME, PictureTable.COLUMNS, PictureTable.DIARYID + "=" + page.getDiaryID() +
 				" and " + PictureTable.PAGEID + "="+page.getPageID()
 				, null, null, null, null);
 		while(oCursor != null && oCursor.moveToNext()) {
 			
-			DiaryPicture picture = new DiaryPicture();
+			picture = new DiaryPicture();
 			picture.setDiaryPictureID(oCursor.getLong(oCursor.getColumnIndex(PictureTable.PICTUREID)));
 			picture.setPageID(oCursor.getLong(oCursor.getColumnIndex(PictureTable.PAGEID)));
+			picture.setByteImage(oCursor.getBlob(oCursor.getColumnIndex(PictureTable.PICTUREPREVIEW)));
 			picture.setDiaryPictureX(oCursor.getInt(oCursor.getColumnIndex(PictureTable.PICTUREX)));
 			picture.setDiaryPictureY(oCursor.getInt(oCursor.getColumnIndex(PictureTable.PICTUREY)));
 			picture.setDiaryPictureW(oCursor.getInt(oCursor.getColumnIndex(PictureTable.PICTUREW)));
@@ -403,7 +422,8 @@ public class Repository extends DBAdapter{
 			/**Decode to Save Memory*/
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inSampleSize=calculatedInSamplesize;
-			picture.setBitmapImage(BitmapFactory.decodeFile(picture.getDiaryImageURI(), options));
+			if(oCursor.getBlob(oCursor.getColumnIndex(PictureTable.PICTUREPREVIEW))!=null)
+				picture.setBitmapImage(BitmapFactory.decodeByteArray(oCursor.getBlob(oCursor.getColumnIndex(PictureTable.PICTUREPREVIEW)),0,oCursor.getBlob(oCursor.getColumnIndex(PictureTable.PICTUREPREVIEW)).length,options));
 			mPictures.put(picture.getDiaryPictureID(), picture);
 		}
 		if(oCursor!=null) oCursor.close();
@@ -487,7 +507,7 @@ public class Repository extends DBAdapter{
 			Log.e(this.getClass().getCanonicalName(),"PersistenceException during Listing Diaries");
 			e.printStackTrace();
 		}catch(SQLException e){
-			Log.e(this.getClass().getCanonicalName(),"SQLException during listing Diaries");
+			Log.e(this.getClass().getCanonicalName(),"listDiaries SQLException during listing Diaries");
 		}
 		return mDiaries;
 	}
@@ -496,7 +516,7 @@ public class Repository extends DBAdapter{
 	 * @param mPageID 
 	 * @param mDiaryID 
 	 * 
-	 * @param int rowID da cancellare
+	 * @param rowID da cancellare
 	 * **/
 	public boolean deleteRow(double rowID, long mDiaryID, long mPageID) {
 		try{
@@ -511,17 +531,15 @@ public class Repository extends DBAdapter{
 			Log.e(this.getClass().getCanonicalName(),"PersistenceException during Listing Diaries");
 			e.printStackTrace();
 		}catch(SQLException e){
-			Log.e(this.getClass().getCanonicalName(),"SQLException during listing Diaries");
+			Log.e(this.getClass().getCanonicalName(),"deleteRow SQLException during listing Diaries");
 		}
 		return false;
 	}
 
     /***
      * Cancella il diario in base all'id arrivato
-     * @param mPageID
-     * @param mDiaryID
+     * @param diaryToDelete
      *
-     * @param int rowID da cancellare
      * **/
     public boolean deleteDiary(Diary diaryToDelete) {
         try{
@@ -544,10 +562,8 @@ public class Repository extends DBAdapter{
 
     /***
      * Cancella una pagina dal diario in base all'id arrivato
-     * @param mPageID
-     * @param mDiaryID
+     * @param pageToDelete
      *
-     * @param int rowID da cancellare
      * **/
     public boolean deletePage(Page pageToDelete) {
         try{
@@ -569,10 +585,9 @@ public class Repository extends DBAdapter{
 
 	/***
 	 * Cancella una riga dal diario in base all'id arrivato
-	 * @param mPageID 
-	 * @param mDiaryID 
-	 * 
-	 * @param int rowID da cancellare
+	 * @param page
+	 * @param pircureID
+	 *
 	 * **/
 	public boolean deleteImage(Page page, long pircureID) {
 		try{
@@ -586,7 +601,7 @@ public class Repository extends DBAdapter{
 			Log.e(this.getClass().getCanonicalName(),"PersistenceException during Listing Diaries");
 			e.printStackTrace();
 		}catch(SQLException e){
-			Log.e(this.getClass().getCanonicalName(),"SQLException during listing Diaries");
+			Log.e(this.getClass().getCanonicalName(),"deleteImage SQLException during listing Diaries");
 		}
 		return false;
 	}
@@ -627,7 +642,123 @@ public class Repository extends DBAdapter{
 		
 	}*/
 
-	
+	/**
+	 * Salva la hand write della pagina corrente
+	 * */
+	public Boolean saveCurrentHandWritePage(Page pageToDump,byte[] imageHW) {
+		int iRowEffect=0;
+
+		ContentValues mPageTable = new ContentValues();
+		Page mPage =pageToDump;
+		mPageTable.put(PagesTable.DIARYID, mPage.getDiaryID());
+		mPageTable.put(PagesTable.PAGEID, mPage.getPageID());
+		mPageTable.put(PagesTable.PAGEHANDWRITE, imageHW);
+		/*mPageTable.put(PagesTable.PAGENUMBER, mPage.getPageNumber());
+		mPageTable.put(PagesTable.PAGELONG, mPage.getPageLong());
+		mPageTable.put(PagesTable.PAGELAT, mPage.getPageLat());
+		mPageTable.put(PagesTable.PAGEALT, mPage.getPageAlt());
+		mPageTable.put(PagesTable.PAGEBOOKMARK, (mPage.isPageBookMark() ? 1 : 0) );
+		mPageTable.put(PagesTable.PAGEDTCREATION, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(mPage.getPageDTCreation()));
+		mPageTable.put(PagesTable.PAGELOC, mPage.getPageLoc());
+		mPageTable.put(PagesTable.PAGEORIENTATION, mPage.getPageOrientation());*/
+		try{
+			open();
+			getmDb().insertOrThrow(PagesTable.TABLE_NAME, null, mPageTable);
+			Log.i(this.getClass().getCanonicalName(), "Add new Preview to diary");
+		}catch(SQLException e){
+			//Log.w(this.getClass().getCanonicalName(), "Error inserting page try to update");
+
+			iRowEffect=getmDb().update(PagesTable.TABLE_NAME, mPageTable,
+					PagesTable.DIARYID + "=" + mPage.getDiaryID() + " and "+PagesTable.PAGEID+"="+mPage.getPageID(),
+					null);
+			if(iRowEffect==0) return false;
+			//Log.i(this.getClass().getCanonicalName(), " Page to diary");
+		} catch (PersistenceException e) {
+			Log.e(this.getClass().getCanonicalName(), "Error during open DB");
+			return false;
+		}finally{
+			close();
+		}
+
+		return true;
+	}
+	/**
+	 * Salva l'anteprima della pagina corrente
+	 * */
+	public Boolean saveCurrentPagePreviewPage(Page pageToDump,byte[] imageHW) {
+		int iRowEffect=0;
+
+		ContentValues mPageTable = new ContentValues();
+		Page mPage =pageToDump;
+		mPageTable.put(PagesTable.DIARYID, mPage.getDiaryID());
+		mPageTable.put(PagesTable.PAGEID, mPage.getPageID());
+		mPageTable.put(PagesTable.PAGEPREVIEW, imageHW);
+		/*mPageTable.put(PagesTable.PAGENUMBER, mPage.getPageNumber());
+		mPageTable.put(PagesTable.PAGELONG, mPage.getPageLong());
+		mPageTable.put(PagesTable.PAGELAT, mPage.getPageLat());
+		mPageTable.put(PagesTable.PAGEALT, mPage.getPageAlt());
+		mPageTable.put(PagesTable.PAGEBOOKMARK, (mPage.isPageBookMark() ? 1 : 0) );
+		mPageTable.put(PagesTable.PAGEDTCREATION, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(mPage.getPageDTCreation()));
+		mPageTable.put(PagesTable.PAGELOC, mPage.getPageLoc());
+		mPageTable.put(PagesTable.PAGEORIENTATION, mPage.getPageOrientation());*/
+		try{
+			open();
+			getmDb().insertOrThrow(PagesTable.TABLE_NAME, null, mPageTable);
+			Log.i(this.getClass().getCanonicalName(), "Add new Preview to diary");
+		}catch(SQLException e){
+			//Log.w(this.getClass().getCanonicalName(), "Error inserting page try to update");
+
+			iRowEffect=getmDb().update(PagesTable.TABLE_NAME, mPageTable,
+					PagesTable.DIARYID + "=" + mPage.getDiaryID() + " and "+PagesTable.PAGEID+"="+mPage.getPageID(),
+					null);
+			if(iRowEffect==0) return false;
+			//Log.i(this.getClass().getCanonicalName(), " Page to diary");
+		} catch (PersistenceException e) {
+			Log.e(this.getClass().getCanonicalName(), "Error during open DB");
+			return false;
+		}finally{
+			close();
+		}
+
+		return true;
+	}
+
+	/**
+	 * Salva l'anteprima della pagina corrente
+	 * */
+	public Boolean saveDiaryPicturePage(DiaryPicture pictureToSave,byte[] imageHW) {
+
+		if (pictureToSave == null) return true;
+		ContentValues mImageTable = new ContentValues();
+		mImageTable.put(PictureTable.PAGEID, pictureToSave.getPageID());
+		mImageTable.put(PictureTable.PICTUREID, pictureToSave.getDiaryPictureID());
+		//BLOB Immagine
+		mImageTable.put(PictureTable.PICTUREPREVIEW, pictureToSave.getByteImage());
+		mImageTable.put(PictureTable.PICTUREH, pictureToSave.getDiaryPictureH());
+		mImageTable.put(PictureTable.PICTUREW, pictureToSave.getDiaryPictureW());
+		mImageTable.put(PictureTable.PICTUREX, pictureToSave.getDiaryPictureX());
+		mImageTable.put(PictureTable.PICTUREY, pictureToSave.getDiaryPictureY());
+		mImageTable.put(PictureTable.PICTUREROTATION, pictureToSave.getDiaryPictureRotation());
+		mImageTable.put(PictureTable.PICTUREURI, pictureToSave.getDiaryImageURI());
+		mImageTable.put(PictureTable.PICTUREHAND, (pictureToSave.isDiaryHandImage() ? 1 : 0));
+		try {
+			open();
+			getmDb().update(PictureTable.TABLE_NAME, mImageTable,
+					PictureTable.PAGEID + "=" + pictureToSave.getPageID()
+							+ " and " +
+							PictureTable.PICTUREID + "=" + pictureToSave.getDiaryPictureID(),
+					null);
+			Log.i(this.getClass().getCanonicalName(), "saveDiaryPicturePage Image");
+			close();
+		} catch (SQLException e) {
+			Log.e(this.getClass().getCanonicalName(), "SQLException saveDiaryPicturePage Image");
+			close();
+		} catch (PersistenceException e) {
+			Log.e(this.getClass().getCanonicalName(), "PersistenceException saveDiaryPicturePage Image");
+			close();
+		}
+		return true;
+	}
 	/**
 	 * Salva la pagina corrente
 	 * */
@@ -639,6 +770,8 @@ public class Repository extends DBAdapter{
 		Page mPage =pageToDump;
 		mPageTable.put(PagesTable.DIARYID, mPage.getDiaryID());
 		mPageTable.put(PagesTable.PAGEID, mPage.getPageID());
+		if(mPage.getByteImagePreviewPage()!=null) mPageTable.put(PagesTable.PAGEPREVIEW, mPage.getByteImagePreviewPage());
+		if(mPage.getByteImageHW()!=null) mPageTable.put(PagesTable.PAGEHANDWRITE, mPage.getByteImageHW());
 		mPageTable.put(PagesTable.PAGENUMBER, mPage.getPageNumber());
 		mPageTable.put(PagesTable.PAGELONG, mPage.getPageLong());
 		mPageTable.put(PagesTable.PAGELAT, mPage.getPageLat());
@@ -678,7 +811,7 @@ public class Repository extends DBAdapter{
 
 	/**
 	 * aggiorna le coordinate di un'immagine 
-	 * @param mDB 
+	 * @param
 	 * 
 	 * 
 	 * */

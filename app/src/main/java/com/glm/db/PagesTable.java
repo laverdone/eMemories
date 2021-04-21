@@ -22,6 +22,10 @@ public interface PagesTable extends BaseColumns {
 	String PAGEID = "pageid";
 	
 	String DIARYID = "diaryid";
+
+	String PAGEPREVIEW = "pagepreview";
+
+	String PAGEHANDWRITE = "pagehandwrite";
 	
 	String PAGEDTCREATION = "pagedtcreation";
 	
@@ -39,6 +43,6 @@ public interface PagesTable extends BaseColumns {
 
 	String PAGEORIENTATION = "pageorientation";
 	
-	String[] COLUMNS = new String[] {PAGEID, DIARYID, PAGEDTCREATION, PAGENUMBER, PAGEBOOKMARK, PAGEALT, PAGELAT, PAGELONG, PAGELOC, PAGEORIENTATION};
+	String[] COLUMNS = new String[] {PAGEID, DIARYID, PAGEPREVIEW, PAGEHANDWRITE, PAGEDTCREATION, PAGENUMBER, PAGEBOOKMARK, PAGEALT, PAGELAT, PAGELONG, PAGELOC, PAGEORIENTATION};
 
 }

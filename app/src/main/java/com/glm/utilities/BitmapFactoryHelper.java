@@ -2,7 +2,7 @@ package com.glm.utilities;
 
 import java.util.concurrent.ExecutionException;
 
-import com.glm.asyncTasks.BitmapLoadAsyncTask;
+//import com.glm.asyncTasks.BitmapLoadAsyncTask;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,12 +12,12 @@ public class BitmapFactoryHelper {
 	/**
 	 * codifica la bitmap in sample size
 	 * */
-	public static Bitmap decodeSampledBitmapFromFile(String filename,int scaleFactor) {
+	/*public static Bitmap decodeSampledBitmapFromFile(String filename,int scaleFactor) {
 
 	    // First decode with inJustDecodeBounds=true to check dimensions
 	    final BitmapFactory.Options options = new BitmapFactory.Options();
 	    Bitmap oBitmap=null; 
-	    /*options.inJustDecodeBounds = true;
+	    *//*options.inJustDecodeBounds = true;
 	    BitmapFactory.decodeFile(filename, options);
 	    int imageHeight = options.outHeight/scaleFactor;
 		int imageWidth = options.outWidth/scaleFactor;
@@ -25,7 +25,7 @@ public class BitmapFactoryHelper {
 	    options.inSampleSize = calculateInSampleSize(options, imageWidth, imageHeight);
 
 	    // Decode bitmap with inSampleSize set
-	    options.inJustDecodeBounds = false;*/
+	    options.inJustDecodeBounds = false;*//*
 	    //TODO async task
 	    BitmapLoadAsyncTask asyncTask = new BitmapLoadAsyncTask(options, filename,scaleFactor);
 		asyncTask.execute();
@@ -42,16 +42,16 @@ public class BitmapFactoryHelper {
 			return null;
 		}
 		//return BitmapFactory.decodeFile(filename, options);
-	}
+	}*/
 	/**
 	 * codifica la bitmap in sample size
 	 * */
-	public static Bitmap decodeSampledBitmapFromFile(String filename) {
+	/*public static Bitmap decodeSampledBitmapFromFile(String filename) {
 
 	    // First decode with inJustDecodeBounds=true to check dimensions
 	    final BitmapFactory.Options options = new BitmapFactory.Options();
 	    Bitmap oBitmap=null; 
-	    /*options.inJustDecodeBounds = true;
+	    *//*options.inJustDecodeBounds = true;
 	    BitmapFactory.decodeFile(filename, options);
 	    int imageHeight = options.outHeight/scaleFactor;
 		int imageWidth = options.outWidth/scaleFactor;
@@ -59,7 +59,7 @@ public class BitmapFactoryHelper {
 	    options.inSampleSize = calculateInSampleSize(options, imageWidth, imageHeight);
 
 	    // Decode bitmap with inSampleSize set
-	    options.inJustDecodeBounds = false;*/
+	    options.inJustDecodeBounds = false;*//*
 	    //TODO async task
 	    BitmapLoadAsyncTask asyncTask = new BitmapLoadAsyncTask(options, filename,getScaleFactor(filename));
 		asyncTask.execute();
@@ -76,11 +76,11 @@ public class BitmapFactoryHelper {
 			return null;
 		}
 		//return BitmapFactory.decodeFile(filename, options);
-	}
+	}*/
 	/**
 	 * codifica la bitmap in sample size
 	 * */
-	private static int getScaleFactor(String filename) {
+	/*private static int getScaleFactor(String filename) {
 
 	    // First decode with inJustDecodeBounds=true to check dimensions
 	    final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -96,11 +96,11 @@ public class BitmapFactoryHelper {
 		}
 		
 	    
-	}
+	}*/
 	/**
 	 * codifica la bitmap in sample size
 	 * */
-	public static Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth, int reqHeight) {
+	/*public static Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth, int reqHeight) {
 	    // First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		Bitmap oBitmap=null;    
@@ -118,5 +118,5 @@ public class BitmapFactoryHelper {
 			Log.e(BitmapFactoryHelper.class.getClass().getCanonicalName(),"ExecutionException during task async");
 			return null;
 		}
-	}
+	}*/
 }

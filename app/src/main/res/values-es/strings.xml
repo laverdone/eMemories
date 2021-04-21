@@ -54,5 +54,6 @@
     <string name="settings_bg_color_confirm">Example action</string>
     <string name="settings_bg_color_dialog">Background Color</string>
     <string name="settings_default_color_confirm">Confirm Color</string>
+    <string name="choose_template">Elija el que más le guste</string>
 
 </resources>

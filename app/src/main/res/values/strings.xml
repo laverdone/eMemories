@@ -64,4 +64,5 @@
 
     <string name="banner_ad_unit_id_home" translatable="false">ca-app-pub-7615079230514788/4790611551</string>
     <string name="banner_ad_unit_id_write" translatable="false">ca-app-pub-7615079230514788/2551508759</string>
+    <string name="choose_template">Choose the one you like</string>
 </resources>

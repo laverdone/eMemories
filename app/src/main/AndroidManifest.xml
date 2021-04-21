@@ -29,6 +29,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:allowClearUserData="true" >
+
         <activity
             android:name="com.glm.labs.diary.ememories.MainActivity"
             android:label="@string/app_name"

@@ -1,7 +1,6 @@
 package com.glm.view;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -11,12 +10,9 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
 
-import android.app.ProgressDialog;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.*;
-import android.graphics.Bitmap.CompressFormat;
-import android.net.Uri;
+import android.os.VibrationEffect;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -37,17 +33,17 @@ import com.glm.db.DiaryRepositoryHelper;
 
 import com.glm.labs.diary.ememories.Const;
 import com.glm.ememories.R;
-import com.glm.utilities.BitmapFactoryHelper;
 import com.glm.utilities.InputConnetionEM;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.Log;
-
+/**
+ * @deprecated
+ * */
 public class TextureHandWrite extends TextureView implements TextureView.SurfaceTextureListener,
         GestureDetector.OnGestureListener {
 	private boolean mDeleteMode=false;
@@ -86,11 +82,11 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
     private Hashtable<Long, DiaryPicture> mImages=null;
     private Map<Long, DiaryPicture> sortedImages=null;
     /**identifica se ho cliccato su un'immagine della pagina*/
-    private boolean isPirtureClick=false;
+    private boolean isPictureClick =false;
     /**identifica se ho long cliccato su un'immagine della pagina*/
-    private boolean isPirtureLongClick=false;
+    private boolean isPictureLongClick =false;
     /**identifica se durante lo spostamento ho spostato un'immagine nell'area di cancellazione*/
-    private boolean isPirtureDelete=false;
+    private boolean isPictureDelete =false;
     private DiaryPicture mPictureToMove=null;
     private Canvas mCanvasForMovePicture = null;
     private Bitmap mPictureBitmapForCanvas = null;
@@ -186,9 +182,9 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 		mCurrentDiary=diary;
 		mCurrentPage=page;
 
-        setDrawingCacheEnabled(true);
+//        setDrawingCacheEnabled(true);
         setFocusableInTouchMode(true);
-        setBackgroundColor(Color.TRANSPARENT);
+//        setBackgroundColor(Color.TRANSPARENT);
         setLongClickable(true);
 
         mGestureDetector = new GestureDetector(mContext,this,null);
@@ -245,7 +241,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         	 /**Avvio il thread per vedere il longclick*/
              //oLongTouchThread.setEvent(event);
              //oLongTouchThread.run();
-        	 //Log.v(this.getClass().getCanonicalName(), "Finger Size: "+event.getSize()*1500);
+        	 //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Finger Size: "+event.getSize()*1500);
 
              if (event.getAction() == MotionEvent.ACTION_DOWN) {                      
                 if(mWritable){
@@ -291,7 +287,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                         //mOneShot=true;
                         mPaint.setStyle(Paint.Style.STROKE);
                         //mPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
-                        mCanvas.drawPath(path,mPaint);
+                        if(mCanvas!=null) mCanvas.drawPath(path,mPaint);
                         init(mCurrentDiary,mCurrentPage);
                         invalidate();
                     }
@@ -306,9 +302,9 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 
 	         	     //PathAsyncTask PathasyncTask = new PathAsyncTask(mContext);
 	         	     //PathasyncTask.execute(path);         	  
-	         	    //Log.v(this.getClass().getCanonicalName(), "DOWN X: "+event.getRawX()+" - Y: "+event.getRawY());
-	         	    isPirtureLongClick=false;
-	         	    isPirtureClick=false;
+	         	    //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "DOWN X: "+event.getRawX()+" - Y: "+event.getRawY());
+	         	    isPictureLongClick =false;
+	         	    isPictureClick =false;
                 }
              } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             	 if(mWritable){
@@ -329,7 +325,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                      	    path.setmPaint(mPaint);
                     		 //path.setPathID(mPathID);
                              mPaint = new Paint();
-                             Log.v(this.getClass().getCanonicalName(), "Finger Size approx: "+(int)mCurrentStrokeWidth);
+                             if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Finger Size approx: "+(int)mCurrentStrokeWidth);
                              mInitialStrokeWidth=mCurrentStrokeWidth;
                	    	}*/
                	     }
@@ -360,7 +356,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                          }else{
                              mPaint.setStrokeWidth(mCurrentStrokeWidth);
                          }
-                         //Log.v(this.getClass().getCanonicalName(), "Old Size: "+mCurrentStrokeWidth+" - NEW Size: "+(mCurrentStrokeWidth/(Math.abs(y_velocity)/1000)));
+                         //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Old Size: "+mCurrentStrokeWidth+" - NEW Size: "+(mCurrentStrokeWidth/(Math.abs(y_velocity)/1000)));
                          mPaint.setAntiAlias(true);
                          path.setmPaint(mPaint);
                      }
@@ -388,8 +384,8 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                      mPrevX=event.getX();
 	                 mPrevY=event.getY();
                  }else{
-                     if(isPirtureClick &&
-                             isPirtureLongClick){                        
+                     if(isPictureClick &&
+							 isPictureLongClick){
                          movePicture(mPictureToMove,event.getX(),event.getY());
                      }
                      //TWO Finger Rotation
@@ -462,16 +458,16 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                          mPaint = new Paint();
 
                  }else{
-                     if(isPirtureClick &&
-                             isPirtureLongClick &&
-                                !isPirtureDelete){
+                     if(isPictureClick &&
+							 isPictureLongClick &&
+                                !isPictureDelete){
 
 
                          //Salvo le coordinate nuove della picture
                          PictureTask updatePicturePosition = new PictureTask(mPictureToMove);
                          updatePicturePosition.execute();
-                         isPirtureClick=false;
-                         isPirtureLongClick=false;
+                         isPictureClick =false;
+                         isPictureLongClick =false;
                          mPictureToMove=null;
                          mDrawBackground=false;
 
@@ -484,18 +480,18 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 
                          return true;
                     }
-
-                    if(isPirtureDelete){
+					//DELETE PICTURE DISABLED
+                    /*if(isPictureDelete){
                         deletePicture();
                         movePicture(null, 0, 0);
-                    }
+                    }*/
                     /*//stop timer
                     touchDuration = System.currentTimeMillis() - touchTime;
                     if(isPirtureClick &&
                     	 touchDuration < 800 ){           
                     	
 
-                        Log.v(this.getClass().getCanonicalName(), "Rotate Picture 90° per Step");
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Rotate Picture 90° per Step");
                     }*/
                  }
                  /*//stop timer
@@ -503,16 +499,16 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 
                  if ( touchDuration < 800 ){
                      isPirtureLongClick=false;
-                     // Log.v(this.getClass().getCanonicalName(), "SHORT CLICK X: "+event.getX()+" - Y: "+event.getY());
+                     // if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "SHORT CLICK X: "+event.getX()+" - Y: "+event.getY());
                  }else{
                       isPirtureLongClick=true;
                       //createCanvasBackground();
-                      Log.v(this.getClass().getCanonicalName(), "LONG CLICK X: "+event.getX()+" - Y: "+event.getY());
+                      if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "LONG CLICK X: "+event.getX()+" - Y: "+event.getY());
                  }*/
              }else if(event.getAction() == MotionEvent.ACTION_POINTER_3_DOWN){
 
                 if(path!=null){
-                    Log.v(this.getClass().getCanonicalName(),"ERASER");
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"ERASER");
                     path.close();
                     mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
                     mCanvasPath.drawPath(path,mPaint);
@@ -524,10 +520,11 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 
 
     private void saveHandWrite(){
-        File mFile=null;
-        FileOutputStream out = null;
-        String sPathImage="";
-        if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+		final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        //File mFile=null;
+        //FileOutputStream out = null;
+        //String sPathImage="";
+        /*if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
             sPathImage=Const.EXTDIR+mContext.getPackageName()+"/"+mCurrentDiary.getDiaryID() + "/Pictures";
         }else{
             sPathImage=Const.INTERNALDIR+mContext.getPackageName()+"/"+mCurrentDiary.getDiaryID() + "/Pictures";
@@ -537,23 +534,31 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 
         if(!dir.exists()) {
             dir.mkdirs();
-        }
+        }*/
         //Task async per salvare l'immagine.
-        Bitmap oBmp = getHandWritePath();
+        final Bitmap oBmp = getHandWritePath();
         try {
             if(oBmp!=null){
-                mFile = new File(sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
-                out = new FileOutputStream(mFile);
+                //mFile = new File(sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+                //out = new FileOutputStream(mFile);
 
-                oBmp.compress(Bitmap.CompressFormat.PNG, 90, out);
-                out.close();
-                out=null;
-                Log.v(this.getClass().getCanonicalName(),"saving hand write image: "+sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+                //.compress(Bitmap.CompressFormat.PNG, 90, out);
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						oBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+					}
+				}).start();
+				byte[] byteArray = stream.toByteArray();
+				DiaryRepositoryHelper.dumpHandWritePage(mContext,mCurrentPage,byteArray);
+                //out.close();
+                //out=null;
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"saving hand write image: "+sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
             }else{
-                Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
             }
-        } catch (IOException e) {
-            Log.e(this.getClass().getCanonicalName(),"Error saving image");
+        } catch (Exception e) {
+            if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error saving image");
         }
     }
 
@@ -682,7 +687,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         return false;
     }*/
     public boolean dispatchKeyEvent(KeyEvent event) {
-        Log.d(this.getClass().getCanonicalName(), "ACTION_DOWN: "+event+"keyboard: "+event.getKeyCode());
+        if(Const.DEVELOPER_MODE) Log.d(this.getClass().getCanonicalName(), "ACTION_DOWN: "+event+"keyboard: "+event.getKeyCode());
         if(event.getKeyCode()==KeyEvent.KEYCODE_DEL){
             deleteCharRowString(iCurrentRow);
             drawTextOnSurface();
@@ -705,15 +710,15 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 				//Forzo il riinsetimento dell'ultima riga
 				//if(!mInsertLastRow) mInsertLastRow=true;
 				//sPageText+=String.valueOf(pressedKey);	
-				//Log.d(this.getClass().getCanonicalName(), "ACTION_DOWN: "+pressedKey+"keyboard: "+keyCode);		
+				//if(Const.DEVELOPER_MODE) Log.d(this.getClass().getCanonicalName(), "ACTION_DOWN: "+pressedKey+"keyboard: "+keyCode);		
 			}
 						
 			drawTextOnSurface();
 			//iPosX++;
-			//Log.d(this.getClass().getCanonicalName(), "ACTION_DOWN keyboard: "+keyCode);
+			//if(Const.DEVELOPER_MODE) Log.d(this.getClass().getCanonicalName(), "ACTION_DOWN keyboard: "+keyCode);
 			return false;
 		}
-		//Log.d(this.getClass().getCanonicalName(), "ACTION_DOWN keyboard: "+keyCode);
+		//if(Const.DEVELOPER_MODE) Log.d(this.getClass().getCanonicalName(), "ACTION_DOWN keyboard: "+keyCode);
 		return false;
 	}
 	
@@ -743,7 +748,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         if(mWritable) return;
         Canvas c=lockCanvas();
         if(c==null) {
-           Log.v(this.getClass().getCanonicalName(),"Canvas NULL on drawTextOnSurface");
+           if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Canvas NULL on drawTextOnSurface");
            return;
         }
 
@@ -773,12 +778,12 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             int iCurrentOffset=getInitialOffsetRow();
 
             for(int i=0;i<nRow;i++){
-                //Log.v(this.getClass().getCanonicalName(),"#############INIZIO##################### ");
-                //Log.v(this.getClass().getCanonicalName(),"First iCurrentOffset:"+iCurrentOffset);
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"#############INIZIO##################### ");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"First iCurrentOffset:"+iCurrentOffset);
 
                 if(iCurrentOffset>iHeight) {
                     //End of Page
-                    Log.v(this.getClass().getCanonicalName(),"END OF PAGE");
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"END OF PAGE");
                     return;
                 }
                 updateRowToDiary(i,getRowString(i),getMarginSX(), iCurrentOffset);
@@ -790,7 +795,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                 /*if(mRows.get((long) i)!=null){
                     if(mRows.get((long) i).getRowPosY()>iHeight) {
                         //End of Page
-                        Log.v(this.getClass().getCanonicalName(),"END OF PAGE");
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"END OF PAGE");
                         return;
                     }
                     updateRowToDiary(i,getRowString(i),mRows.get((long) i).getRowPosX(), mRows.get((long) i).getRowPosY());
@@ -798,7 +803,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                             getRow(i));
                     lastX=mRows.get((long) i).getRowPosX();
                     lastY=mRows.get((long) i).getRowPosY();
-                    //Log.v(this.getClass().getCanonicalName(),"case 1");
+                    //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"case 1");
 
                 }else{
                     try{
@@ -810,11 +815,11 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                                     getRow(i));
                             lastX= iPosX;
                             lastY= iPosY;
-                            //Log.v(this.getClass().getCanonicalName(),"case 2->1");
+                            //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"case 2->1");
                         }else{
                             if(iCurrentOffset>iHeight) {
                                 //End of Page
-                                Log.v(this.getClass().getCanonicalName(),"END OF PAGE");
+                                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"END OF PAGE");
                                 return;
                             }
                             updateRowToDiary(i,getRowString(i),getMarginSX(), iCurrentOffset);
@@ -822,17 +827,17 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                                     getRow(i));
                             lastX=getMarginSX();
                             lastY=iCurrentOffset;
-                            //Log.v(this.getClass().getCanonicalName(),"case 2->2");
+                            //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"case 2->2");
                         }
                     }catch (IndexOutOfBoundsException e){
-                        Log.e(this.getClass().getCanonicalName(),"IndexOutOfBoundsException ");
+                        if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"IndexOutOfBoundsException ");
                         return;
                     }
                 }*/
                 iCurrentOffset+=getOffsetRow();
                 iLastOffset=iCurrentOffset;
-                //Log.v(this.getClass().getCanonicalName(),"Stringa: "+getRowString(i)+" afther iCurrentOffset:"+iCurrentOffset+" - getOffsetRow: "+getOffsetRow()+" - getMarginSX():"+getMarginSX());
-                //Log.v(this.getClass().getCanonicalName(),"#############FINE##################### ");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Stringa: "+getRowString(i)+" afther iCurrentOffset:"+iCurrentOffset+" - getOffsetRow: "+getOffsetRow()+" - getMarginSX():"+getMarginSX());
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"#############FINE##################### ");
             }
 
             Paint oCursor = new Paint();
@@ -854,16 +859,16 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         if (c != null) {
             try{
                 unlockCanvasAndPost(c);
-                //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
             }catch(IllegalArgumentException e){
                 //TODO
-                Log.e(this.getClass().getCanonicalName(),"drawTextOnSurface thread error canvas");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"drawTextOnSurface thread error canvas");
             }
         	c=null;
         	//mTextBitmap.recycle();
         	//mTextBitmap=null;
         	mTextCanvas=null;
-            //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost Canvas");
+            //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost Canvas");
         }
 	}
 	
@@ -874,54 +879,73 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 	 * **/
 	protected void refresh(Canvas canvas) {
 
+		/*if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),
+				"Bitmap Recycled mBitmapForPage:"+mBitmapForPage.isRecycled()+
+				" mPictureBitmapForCanvas:"+mPictureBitmapForCanvas.isRecycled()+
+				" bmpPath:"+bmpPath.isRecycled()+
+				" mTextBitmap:"+mTextBitmap.isRecycled());*/
 		int _Initializer = _graphics.size()-iUndo;
+
 		if(canvas!=null && _Initializer<=0){
             //canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             //Questa bitmap contiene il background
-            if(mBitmapForPage !=null) canvas.drawBitmap(mBitmapForPage, identityMatrix, null);
+
+            if(mBitmapForPage !=null
+					&& !mBitmapForPage.isRecycled()) canvas.drawBitmap(mBitmapForPage, identityMatrix, null);
+			
             //Disegno lo spostamento dell'immagine
-            if(mPictureBitmapForCanvas!=null) canvas.drawBitmap(mPictureBitmapForCanvas, identityMatrix, null);
-            //Disegno le vecchie path
-            if(bmpPath!=null) canvas.drawBitmap(bmpPath, identityMatrix, null);
-            if(mTextBitmap!=null) canvas.drawBitmap(mTextBitmap, identityMatrix, null);
-			//Log.v(this.getClass().getCanonicalName(),"draw background no path");
+			if(mPictureBitmapForCanvas!=null
+					&& !mPictureBitmapForCanvas.isRecycled()) canvas.drawBitmap(mPictureBitmapForCanvas, identityMatrix, null);
+
+			//Disegno le vecchie path
+			//ERRORE NELLE VECCHIE PATH
+            if(bmpPath!=null
+					&& !bmpPath.isRecycled()) canvas.drawBitmap(bmpPath, identityMatrix, null);
+
+            if(mTextBitmap!=null
+					&& !mTextBitmap.isRecycled()) canvas.drawBitmap(mTextBitmap, identityMatrix, null);
+			//if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"draw background no path");
             mOneShot=true;
 		}
-				
+
 		if(canvas!=null && _Initializer>0){
             //canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            //Log.v(this.getClass().getCanonicalName(),"draw background with path");
+            //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"draw background with path");
             if(mWritable){
               //Questa bitmap contiene il background
-              if(mBitmapForPage !=null && mOneShot) canvas.drawBitmap(mBitmapForPage, identityMatrix, null);
+              if(mBitmapForPage !=null && mOneShot && !mBitmapForPage.isRecycled()) canvas.drawBitmap(mBitmapForPage, identityMatrix, null);
               try{
 
                 if(mCanvas!=null) {
                     mCanvas.drawPath(_graphics.get(_Initializer), _graphics.get(_Initializer).getmPaint());
                 }
               }catch (IndexOutOfBoundsException e){
-                  Log.w(this.getClass().getCanonicalName(),"out of bound");
+                  if(Const.DEVELOPER_MODE) Log.w(this.getClass().getCanonicalName(),"out of bound");
               }
               //Disegno lo spostamento dell'immagine
-              if(mPictureBitmapForCanvas!=null && mOneShot) canvas.drawBitmap(mPictureBitmapForCanvas, identityMatrix, null);
+              if(mPictureBitmapForCanvas!=null && mOneShot && !mPictureBitmapForCanvas.isRecycled()) canvas.drawBitmap(mPictureBitmapForCanvas, identityMatrix, null);
               //Disegno le vecchie path
-              if(bmpPath!=null) canvas.drawBitmap(bmpPath, identityMatrix, null);
+              if(bmpPath!=null
+					  && !bmpPath.isRecycled()) canvas.drawBitmap(bmpPath, identityMatrix, null);
               //Questo nel caso in cui sto scrivento con path
-              if(mTextBitmap!=null && mOneShot) canvas.drawBitmap(mTextBitmap, identityMatrix, null);
+              if(mTextBitmap!=null && mOneShot && !mTextBitmap.isRecycled()) canvas.drawBitmap(mTextBitmap, identityMatrix, null);
               if(mOneShot) mOneShot=false;
             }else{
               //Questa bitmap contiene il background
-              if(mBitmapForPage !=null) canvas.drawBitmap(mBitmapForPage, identityMatrix, null);
+              if(mBitmapForPage !=null
+					  && !mBitmapForPage.isRecycled()) canvas.drawBitmap(mBitmapForPage, identityMatrix, null);
               if(mCanvas!=null) mCanvas.drawPath(_graphics.get(_Initializer), _graphics.get(_Initializer).getmPaint());
               //Disegno lo spostamento dell'immagine
-              if(mPictureBitmapForCanvas!=null && mOneShot) canvas.drawBitmap(mPictureBitmapForCanvas, identityMatrix, null);
+              if(mPictureBitmapForCanvas!=null && mOneShot && !mPictureBitmapForCanvas.isRecycled()) canvas.drawBitmap(mPictureBitmapForCanvas, identityMatrix, null);
               //Disegno le vecchie path
-              if(bmpPath!=null) canvas.drawBitmap(bmpPath, identityMatrix, null);
+              if(bmpPath!=null
+					  && !bmpPath.isRecycled()) canvas.drawBitmap(bmpPath, identityMatrix, null);
               //Questo nel caso in cui sto scrivento con path
-              if(mTextBitmap!=null && mOneShot) canvas.drawBitmap(mTextBitmap, identityMatrix, null);
+              if(mTextBitmap!=null && mOneShot && !mTextBitmap.isRecycled()) canvas.drawBitmap(mTextBitmap, identityMatrix, null);
               if(mOneShot) mOneShot=true;
             }
 		}
+		drawPicturePage();
 	}
 	/**
 	 * carica le immagini della pagina salvata.
@@ -934,28 +958,30 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 		if(mCurrentPage==null
                 || mCurrentPage.getDiaryImage()==null
                    || mCurrentPage.getDiaryImage().size()==0){
-            if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"NO Pucture on Page");
+            if(Const.DEVELOPER_MODE) if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"NO Pucture on Page");
             return;
         }
 		mImages = (Hashtable<Long, DiaryPicture>) mCurrentPage.getDiaryImage();
 		sortedImages = new TreeMap<Long, DiaryPicture>(mImages);
         if(mPictureBitmapForCanvas==null){
-            if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"mPictureBitmapForCanvas is NULL created");
+            if(Const.DEVELOPER_MODE) if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"mPictureBitmapForCanvas is NULL created");
             mPictureBitmapForCanvas = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
          }
 
         if(mCanvasForMovePicture ==null){
-            if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"mCanvasForMovePicture is NULL created");
+            if(Const.DEVELOPER_MODE) if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"mCanvasForMovePicture is NULL created");
             mCanvasForMovePicture = new Canvas(mPictureBitmapForCanvas);
         }
         //Cancello la vecchia immagine
-        mPictureBitmapForCanvas.eraseColor(Color.TRANSPARENT);
+        if(mPictureBitmapForCanvas!=null
+				&& !mPictureBitmapForCanvas.isRecycled())mPictureBitmapForCanvas.eraseColor(Color.TRANSPARENT);
 
         for(DiaryPicture oPicture : sortedImages.values()){
 			if(mCanvasForMovePicture!=null &&
-					oPicture!=null){
-                Log.v(this.getClass().getCanonicalName(),"Draw old Picture");
-                if(oPicture.getBitmapImage()==null){
+					oPicture!=null && oPicture.getByteImage()!=null){
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Draw old Picture ERROR HERE!!!!!");
+                if(BitmapFactory.decodeByteArray(oPicture.getByteImage(),0,oPicture.getByteImage().length)==null){
+					//if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"No Picture Bitmap!!!!!");
                 	mImages.remove(oPicture.getDiaryPictureID());
                 	continue;
                 }
@@ -966,10 +992,15 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                 matrix.postTranslate(oPicture.getDiaryPictureX(), oPicture.getDiaryPictureY());
                 mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(), matrix, null);*/
                 mMatrixPictureCanvas.reset();
+
                 mMatrixPictureCanvas.postRotate(oPicture.getDiaryPictureRotation());
+
                 mMatrixPictureCanvas.postTranslate(oPicture.getDiaryPictureX(),oPicture.getDiaryPictureY());
+
                 //mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(), oPicture.getDiaryPictureX(), oPicture.getDiaryPictureY(), mPaint);
-                mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(), mMatrixPictureCanvas, mPaint);
+                //ERRRORE HERE
+				//mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(), mMatrixPictureCanvas, mPaint);
+				mCanvasForMovePicture.drawBitmap(BitmapFactory.decodeByteArray(oPicture.getByteImage(),0,oPicture.getByteImage().length), mMatrixPictureCanvas, mPaint);
 			}		
 		}
 	}
@@ -1059,7 +1090,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             //_thread.setRunning(false);
             //_thread.setStopThread(false);
             _thread.interrupt();
-		    Log.v(this.getClass().getCanonicalName(),"setWritable _thread interupted");
+		    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"setWritable _thread interupted");
         }
         _thread=null;
 
@@ -1079,7 +1110,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 					_thread.isAlive()){
                 _thread.interrupt();
 		        //_thread.setRunning(mWritable);
-                Log.v(this.getClass().getCanonicalName(),"Interrupt Thread END Drawing");
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Interrupt Thread END Drawing");
 		    }
 
 		    _thread=null;
@@ -1087,7 +1118,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             ((LinearLayout) getParent()).removeView(oRowEdit);
 			if(_thread!=null && 
 					!_thread.isAlive()){
-                Log.v(this.getClass().getCanonicalName(),"Interrupt Thread and Create new Thread for Drawing");
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Interrupt Thread and Create new Thread for Drawing");
                 _thread.interrupt();
 				//_thread.setRunning(mWritable);
                 _thread=null;
@@ -1095,7 +1126,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                 //_thread.setRunning(mWritable);
                 _thread.start();
 			}else{
-                Log.v(this.getClass().getCanonicalName(),"Create new Thread for Drawing");
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Create new Thread for Drawing");
                 _thread = new DrawingThread();
                 //_thread.setRunning(mWritable);
                 _thread.start();
@@ -1127,14 +1158,14 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
     	findIfTouchPicture(motionEvent);
 
         if(mPictureToMove!=null){
-            //Apri l'immagine selezionata
+            /*//Apri l'immagine selezionata
             Intent intentGallery = new Intent();
             intentGallery.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intentGallery.setAction(Intent.ACTION_VIEW);
             intentGallery.setDataAndType(Uri.parse("file://"+ mPictureToMove.getDiaryImageURI()), "image/*");
             mContext.getApplicationContext().startActivity(intentGallery);
-            Log.v(this.getClass().getCanonicalName(), "onSingleTapUp Via GestureDetector");
-            mPictureToMove=null;
+            if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "onSingleTapUp Via GestureDetector");
+            mPictureToMove=null;*/
         }else{
             if(!findIfTouchOnText(motionEvent.getX(), motionEvent.getY())){
                 ((LinearLayout) getParent()).removeView(oRowEdit);
@@ -1186,12 +1217,13 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
     public void onLongPress(MotionEvent motionEvent) {
 
         findIfTouchPicture(motionEvent);
-        if(mPictureToMove!=null){
-            isPirtureLongClick=true;
-            Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
-            v.vibrate(100);
-            selectPicture(mPictureToMove,true);
-        }
+		if(mPictureToMove!=null){
+			isPictureLongClick =true;
+			Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+			v.vibrate(VibrationEffect.createOneShot(150l,1));
+			//v.vibrate(100);
+			selectPicture(mPictureToMove,true);
+		}
 
     }
 
@@ -1200,7 +1232,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 
         findIfTouchPicture(motionEvent);
          if(mPictureToMove!=null){
-            Log.v(this.getClass().getCanonicalName(),"onFling Press Via GestureDetector");
+            if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"onFling Press Via GestureDetector");
             //PictureRotateTask updatePictureAngle = new PictureRotateTask(mPictureToMove);
             //updatePictureAngle.execute();
         }
@@ -1257,7 +1289,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             while (!isAvailable()) {
                 try {
                     sleep(1000);
-                    Log.e(this.getClass().getCanonicalName(),"TextureView is not Avaiable wait...");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"TextureView is not Avaiable wait...");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -1269,7 +1301,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             }    
             if (c != null) {
                 _surfaceHolder.unlockCanvasAndPost(c);
-                //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost Canvas");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost Canvas");
             }*/
             //createCanvasBackground();
 
@@ -1280,9 +1312,9 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                     c = null;
                     try {
                         c = lockCanvas();
-                        //Log.v(this.getClass().getCanonicalName(),"H: "+c.getHeight()+" W: "+c.getWidth());
+                        //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"H: "+c.getHeight()+" W: "+c.getWidth());
                         if(c==null){
-                            Log.e(this.getClass().getCanonicalName(),"canvas _surfaceHolder is Null");
+                            if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"canvas _surfaceHolder is Null");
                             interrupt();
                             return;
                         }
@@ -1298,7 +1330,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                             if (c != null)
                                 unlockCanvasAndPost(c);
                         }catch (IllegalArgumentException e){
-                            Log.e(this.getClass().getCanonicalName(),"thread unlockCanvasAndPost error");
+                            if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"thread unlockCanvasAndPost error");
                             e.printStackTrace();
                             interrupt();
                         }
@@ -1310,10 +1342,10 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                 try{
                     c.save();
                 	unlockCanvasAndPost(c);
-                	//Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
+                	//if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
                 }catch(IllegalArgumentException e){
                 	//TODO
-                    Log.e(this.getClass().getCanonicalName(),"run thread error canvas");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"run thread error canvas");
                     e.printStackTrace();
                     interrupt();
                 }
@@ -1326,10 +1358,10 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
     @Override
 	public void onSurfaceTextureAvailable(SurfaceTexture surface, int width,
 			int height) {
-        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"SurfaceTexture Visible");
+        if(Const.DEVELOPER_MODE) if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"SurfaceTexture Visible");
 		iWidth=getWidth();
 		iHeight=getHeight();
-            //drawPicturePage();
+            drawPicturePage();
 
         createCanvasBackground();
         drawTextOnSurface();
@@ -1339,7 +1371,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
              aTask.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    Log.v(this.getClass().getCanonicalName(),"Delay Picture DRAW");
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Delay Picture DRAW");
                     drawPicturePage();
                 }
             },2000);*/
@@ -1354,7 +1386,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 		boolean retry = true;
         //if(_thread!=null) _thread.setRunning(false);
         surface.release();
-        Log.v(this.getClass().getCanonicalName(), "surfaceDestroyed _thread interupted");
+        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "surfaceDestroyed _thread interupted");
         if(_thread==null) return false;
         _thread.interrupt();
 		_thread=null;
@@ -1364,12 +1396,12 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 	@Override
 	public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width,
 			int height) {
-        //Log.v(this.getClass().getCanonicalName(), "onSurfaceTextureSizeChanged CHANGED");
+        //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "onSurfaceTextureSizeChanged CHANGED");
 		
 	}
 	@Override
 	public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-		//Log.v(this.getClass().getCanonicalName(), "onSurfaceTextureUpdated UPDATE");
+		//if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "onSurfaceTextureUpdated UPDATE");
         //postInvalidate();
 	}
 
@@ -1379,7 +1411,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
     	//paintBackground(holder);
-    	Log.v(this.getClass().getCanonicalName(), "SURFACE MODIFY");
+    	if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "SURFACE MODIFY");
 	}
 
 	@Override
@@ -1391,7 +1423,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 			drawTextOnSurface();
 			addThreadForRefresh(); 
 			//mDrawBackground=false;	
-			Log.v(this.getClass().getCanonicalName(),"surfaceCreated Visible");	
+			if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"surfaceCreated Visible");	
 		}
 			 
 	}
@@ -1410,7 +1442,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                 // we will try it again and again...
             }
         }
-        Log.v(this.getClass().getCanonicalName(), "surfaceDestroyed _thread interupted");
+        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "surfaceDestroyed _thread interupted");
 		_thread=null;
 	}*/
 	
@@ -1424,14 +1456,14 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 				 !_thread.isAlive()){
 			 //_thread.setRunning(mWritable);
 			 _thread.start();	
-			 Log.v(this.getClass().getCanonicalName(),"addThreadForRefresh _thread started");
+			 if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"addThreadForRefresh _thread started");
 		 }else{
 			 _thread = new DrawingThread();
 			// _thread.setRunning(mWritable);
 			 _thread.start();
-			 Log.v(this.getClass().getCanonicalName(),"addThreadForRefresh new _thread started");
+			 if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"addThreadForRefresh new _thread started");
 		 }
-       // Log.v(this.getClass().getCanonicalName(),"Surface Created _thread started");
+       // if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Surface Created _thread started");
        // postInvalidate();
 	}
 	
@@ -1447,11 +1479,11 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 	 * libera memoria
 	 * */
 	public void freeBitmap(){
-		if(bmpPath!=null) bmpPath.recycle();
-		if(mBitmapForPage !=null) mBitmapForPage.recycle();
-		if(mTextBitmap!=null) mTextBitmap.recycle();
+		if(bmpPath!=null && !bmpPath.isRecycled()) bmpPath.recycle();
+		if(mBitmapForPage !=null && !mBitmapForPage.isRecycled()) mBitmapForPage.recycle();
+		if(mTextBitmap!=null && !mTextBitmap.isRecycled()) mTextBitmap.recycle();
 		//if(mBmpPage!=null) mBmpPage.recycle();
-        if(mPictureBitmapForCanvas!=null) mPictureBitmapForCanvas.recycle();
+        if(mPictureBitmapForCanvas!=null && !mPictureBitmapForCanvas.isRecycled()) mPictureBitmapForCanvas.recycle();
         mPictureToMove=null;
 		//mBmpPage=null;
  		bmpPath=null;
@@ -1466,8 +1498,8 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         //System.gc();
 		//mSurfaceHolder.unlockCanvasAndPost(mSurfaceHolder.lockCanvas());
 
-		Log.v(this.getClass().getCanonicalName(), "########### free bitmap memory ##############");
-        Log.v(this.getClass().getCanonicalName(), "########### free memory is "+
+		if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "########### free bitmap memory ##############");
+        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "########### free memory is "+
                 Runtime.getRuntime().freeMemory()+" total is "+
                 Runtime.getRuntime().totalMemory()+" ##############");
 
@@ -1538,7 +1570,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 	private void applyTemplate() {
 		if(mCurrentDiary==null || mCurrentPage==null) return;
 		
-		Log.v(this.getClass().getCanonicalName(),"Loading font...");
+		if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Loading font...");
 		oFont        = Typeface.createFromAsset(mContext.getAssets(), "template/"+mCurrentDiary.getDiaryTemplate()+"/font.ttf");
 		if(mCurrentDiary.getDiaryTemplate()==3 ||
                 mCurrentDiary.getDiaryTemplate()==6){
@@ -1693,14 +1725,14 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 		synchronized (c) {
 			if(!mDrawBackground || iWidth<=0) return;
 			//if(iWidth<=0 || iHeight<=0) return;
-			//Log.v(this.getClass().getCanonicalName(), "############ createCanvasBackground ######### "+iWidth+" - "+iHeight);
-            //Log.e(this.getClass().getCanonicalName(), "############ createCanvasBackground ######### "+iWidth+" - "+iHeight);
+			//if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "############ createCanvasBackground ######### "+iWidth+" - "+iHeight);
+            //if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(), "############ createCanvasBackground ######### "+iWidth+" - "+iHeight);
 
-            if(mTextBitmap!=null) mTextBitmap.recycle();
+            if(mTextBitmap!=null && !mTextBitmap.isRecycled()) mTextBitmap.recycle();
 			mTextBitmap	= Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
 			mTextBitmap.eraseColor(Color.TRANSPARENT);
 
-            if(mBitmapForPage!=null) mBitmapForPage.recycle();
+            if(mBitmapForPage!=null && !mBitmapForPage.isRecycled()) mBitmapForPage.recycle();
 			mBitmapForPage = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
 			mBitmapForPage.eraseColor(Color.TRANSPARENT);
 
@@ -1765,19 +1797,25 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 
 			}
 
+			//TODO Ridisegno le immagini della pagina
             if (mCurrentDiary != null && mContext != null && mCurrentPage != null) {
-                File tmpImgFile = new File(Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + mCurrentDiary.getDiaryID() + "/Pictures/h" + mCurrentPage.getPageID() + Const.PAGE_PREVIEW_EXT);
-                if (tmpImgFile.exists()) {
+				//File tmpImgFile = new File(Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + mCurrentDiary.getDiaryID() + "/Pictures/h" + mCurrentPage.getPageID() + Const.PAGE_PREVIEW_EXT);
+                //if (tmpImgFile.exists()) {
                     //le vecchie path da usare in un task async
-                    Bitmap immutable = BitmapFactoryHelper.decodeSampledBitmapFromFile(Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + mCurrentDiary.getDiaryID() + "/Pictures/h" + mCurrentPage.getPageID() + Const.PAGE_PREVIEW_EXT, 1);
-                    if (immutable != null) {
-                        if (bmpPath != null) bmpPath.recycle();
-                        bmpPath = immutable.copy(Bitmap.Config.ARGB_8888, true);
-                        immutable.recycle();
-                        immutable = null;
-
-                    }
-                }
+				    if(mCurrentPage.getByteImageHW()!=null){
+						Bitmap bmp = BitmapFactory.decodeByteArray(mCurrentPage.getByteImageHW(), 0, mCurrentPage.getByteImageHW().length);
+						Bitmap immutable = bmp.copy(Bitmap.Config.ARGB_8888, true);
+						//Canvas canvas = new Canvas(mutableBitmap); // now it should work ok
+						//Bitmap immutable = BitmapFactoryHelper.decodeSampledBitmapFromFile(Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + mCurrentDiary.getDiaryID() + "/Pictures/h" + mCurrentPage.getPageID() + Const.PAGE_PREVIEW_EXT, 1);
+						if (immutable != null) {
+							if (bmpPath != null) {
+								bmpPath.recycle();
+								if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"###################RECYCLED bmpPath HERE!!!##################");
+							}
+							bmpPath = immutable.copy(Bitmap.Config.ARGB_8888, true);
+							immutable.recycle();
+						}
+					}
             }
 
 
@@ -1808,15 +1846,15 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         if (c != null) {
             try {
                 unlockCanvasAndPost(c);
-                //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
             } catch (IllegalArgumentException e) {
                 //TODO
-                Log.e(this.getClass().getCanonicalName(), "createCanvasBackground thread error canvas");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(), "createCanvasBackground thread error canvas");
             }
             c = null;
             //mTextBitmap.recycle();
             //mTextBitmap=null;
-            //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost Canvas");
+            //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost Canvas");
         }
     }
     /**
@@ -1880,13 +1918,13 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         mOneShot=true;
 		Canvas c=lockCanvas();
 		if(c==null) {
-            Log.v(this.getClass().getCanonicalName(),"Canvas is NULL, not drawing");
+            if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Canvas is NULL, not drawing");
             return;
         }
 		synchronized (c) {
 			if(!mDrawBackground || iWidth<=0) return;
 			//if(iWidth<=0 || iHeight<=0) return;
-			Log.v(this.getClass().getCanonicalName(), "############ drawEmptyPage ######### "+iWidth+" - "+iHeight);
+			if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "############ drawEmptyPage ######### "+iWidth+" - "+iHeight);
 			
 			if(mTextBitmap!=null) mTextBitmap.recycle();
 			mTextBitmap	= Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
@@ -1923,28 +1961,28 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 		if (c != null) {
             try{
                 unlockCanvasAndPost(c);
-                //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
             }catch(IllegalArgumentException e){
                 //TODO
-                Log.e(this.getClass().getCanonicalName(),"drawEmptyPage thread error canvas");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"drawEmptyPage thread error canvas");
             }
         	c=null;
         	//mTextBitmap.recycle();
         	//mTextBitmap=null;
-            //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost Canvas");
+            //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost Canvas");
         }
 	}*/
 	/**
 	 * Applica il template selezionato
 	 * 
 	 * 
-	 * */
+	 *
 	public void applyPaperPreview(Page page) {
 			String sPathImage=Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/"+page.getDiaryID() + "/Pictures";
 			Bitmap preview = BitmapFactoryHelper.decodeSampledBitmapFromFile(sPathImage + "/" + page.getPageID() + Const.CAMERA_PREVIEW_EXT, 1); //BitmapFactory.decodeFile(sPathImage+"/"+page.getPageID()+Const.PAGE_PREVIEW_EXT);
 			setImagePage(preview);
 			preview=null;
-	}
+	}*/
 	
 	/**
 	 * Applica il template selezionato
@@ -1956,7 +1994,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 			Bitmap paper = BitmapFactory.decodeStream(mContext.getAssets().open("template/"+mCurrentDiary.getDiaryTemplate()+"/paper.jpg"));
 			setImagePage(paper);
 		} catch (IOException e) {
-			Log.e(this.getClass().getCanonicalName(),"Error Apply template");
+			if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error Apply template");
 		}
 	}
 	
@@ -2007,7 +2045,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 				iCurrentRow=0;
 				init(iCurrentRow);
 			}
-			Log.i(TAG,"Delete prev. row");
+			if(Const.DEVELOPER_MODE) Log.i(TAG,"Delete prev. row");
 			
 		}catch(ArrayIndexOutOfBoundsException e){
 			
@@ -2025,7 +2063,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 	private void removeRowToDiary(int rowToRemove) {
 		if(iCurrentRow>0){
 			long mRowID=rowToRemove;
-			Log.v(this.getClass().getCanonicalName(),"Delete Row String");
+			if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Delete Row String");
 			mRows.remove(mRowID);
 			aRowCustomPos.remove(rowToRemove);
 			RowAsyncTask asyncTask = new RowAsyncTask(mContext);
@@ -2038,7 +2076,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 	 * 
 	 * */
 	public void init(int iRow) {
-		Log.v(this.getClass().getCanonicalName(),"init New Row:"+iCurrentRow);
+		if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"init New Row:"+iCurrentRow);
 		Paint TextPaintPage = new Paint();
 		TextPaintPage.setColor(mTextColor);
 		TextPaintPage.setAntiAlias(true);				
@@ -2145,8 +2183,11 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 		TextPaintPage.setFakeBoldText(true);
 		
 		TextPaintPage.setTextSize(fontSize);
-		
-		return aPaint.get(iRow);
+		try{
+            return aPaint.get(iRow);
+        }catch (IndexOutOfBoundsException e){
+            return TextPaintPage;
+        }
 	}
 	/**
 	 * identifica la parola intera e va a capo tutta togliendola dalla riga corrente
@@ -2155,11 +2196,11 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 	private String findWord(String sCurrentText) {
 		String sWord="";
 		if(sCurrentText.endsWith(" ")){
-			Log.v(TAG,"nuova parola non devo fare nulla");
+			if(Const.DEVELOPER_MODE) Log.v(TAG,"nuova parola non devo fare nulla");
 			return "";
 		}else{
 			if(sCurrentText.indexOf(" ")==-1){
-				Log.v(TAG,"nessun spazio sulla riga non devo fare nulla");
+				if(Const.DEVELOPER_MODE) Log.v(TAG,"nessun spazio sulla riga non devo fare nulla");
 				return "";
 			}else{
 				sWord=sCurrentText.substring(sCurrentText.lastIndexOf(" ")+1,sCurrentText.length());
@@ -2209,7 +2250,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 			init(iRow);
 			aRows.add(iRow,oRow.getRowText());
 			iCurrentRow=iRow;
-			//Log.v(this.getClass().getCanonicalName(),"row add: "+iRow);
+			//if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"row add: "+iRow);
 			iRow++;
 		}
 		//NewPageView.this.invalidate();
@@ -2226,11 +2267,11 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 		
 		if(mRows.size()>0){
 			//Devo inserire il popolamento della pagina solo se ci sono righe
-			Log.v(this.getClass().getCanonicalName(),"Load non Empty Page");
+			if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Load non Empty Page");
 			setRowsString();
 		}else{
 			iCurrentRow=0;
-			Log.v(this.getClass().getCanonicalName(),"Add empty Page");
+			if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Add empty Page");
 			init(iCurrentRow);
 		}
 		
@@ -2255,7 +2296,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             if(mCanvasForMovePicture==null){
                mCanvasForMovePicture = new Canvas();
                mCanvasForMovePicture.setBitmap(mPictureBitmapForCanvas);
-               Log.v(this.getClass().getCanonicalName(), "Create Canvas for move picture addPicture");
+               if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Create Canvas for move picture addPicture");
             }
             mCanvasForMovePicture.drawBitmap(bitmap, oPicture.getDiaryPictureX(), oPicture.getDiaryPictureY(), mPaint);
         	refresh(c);
@@ -2263,10 +2304,10 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         if (c != null) {
             try{
                 unlockCanvasAndPost(c);
-                //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
             }catch(IllegalArgumentException e){
                 //TODO
-                Log.e(this.getClass().getCanonicalName(),"addPicture thread error canvas");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"addPicture thread error canvas");
             }
         	c=null;
         }
@@ -2284,17 +2325,18 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         yFinger=motionEvent.getY(0);
 
         for(DiaryPicture oPicture : sortedImages.values()){
-			if(oPicture.getBitmapImage()==null) continue;
-			Log.v(this.getClass().getCanonicalName(),"oPicture X: "+oPicture.getDiaryPictureX()+" fingerX: "+xFinger+
+			if(oPicture.getByteImage()==null || oPicture.isDiaryHandImage()) continue;
+			if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"oPicture X: "+oPicture.getDiaryPictureX()+" fingerX: "+xFinger+
                     " - Y: "+oPicture.getDiaryPictureY()+" fingerY: "+yFinger);
 			if((xFinger>=oPicture.getDiaryPictureX()
-					&& xFinger<=(oPicture.getDiaryPictureX()+ oPicture.getBitmapImage().getWidth()))
+					&& xFinger<=(oPicture.getDiaryPictureX()+ BitmapFactory.decodeByteArray(oPicture.getByteImage(),0,oPicture.getByteImage().length).getWidth()))
 					&& (yFinger>=oPicture.getDiaryPictureY()
-					&& yFinger<=(oPicture.getDiaryPictureY()+ oPicture.getBitmapImage().getHeight()))
+					&& yFinger<=(oPicture.getDiaryPictureY()+ BitmapFactory.decodeByteArray(oPicture.getByteImage(),0,oPicture.getByteImage().length).getHeight()))
 					){
 				//La coordinata X Y rientra nell'immagine
-				isPirtureClick=true;
+				isPictureClick =true;
 				mPictureToMove=oPicture;
+
                 return;
 
 				//Toast.makeText(mContext, "Bitmap: Cliccabled", Toast.LENGTH_SHORT).show();
@@ -2392,7 +2434,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         synchronized (c) {
             if(mPictureBitmapForCanvas==null){
                 mPictureBitmapForCanvas = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
-                Log.v(this.getClass().getCanonicalName(),"Create Bitmap for move picture");
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Create Bitmap for move picture");
             }
 
 
@@ -2402,7 +2444,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             if(mCanvasForMovePicture ==null){
                 mCanvasForMovePicture = new Canvas();
                 mCanvasForMovePicture.setBitmap(mPictureBitmapForCanvas);
-                Log.v(this.getClass().getCanonicalName(), "Create Canvas for move picture");
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Create Canvas for move picture");
             }
 
             //if(bmpPath!=null) mCanvasForMovePicture.drawBitmap(bmpPath, MatrixPictureCanvas, null);
@@ -2410,7 +2452,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             //if(mTextBitmap!=null) mCanvasForMovePicture.drawBitmap(mTextBitmap, MatrixPictureCanvas, null);
 
             if(mCanvasForMovePicture!=null &&
-                    pictureToMove!=null){
+                    pictureToMove!=null && !pictureToMove.isDiaryHandImage()){
                 //Rect fromRect1 = new Rect(0, 0, , bgrH);
               /*  Matrix matrix = new Matrix();
                 matrix.reset();
@@ -2421,12 +2463,13 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                 mMatrixPictureCanvas.reset();
                 mMatrixPictureCanvas.postRotate(pictureToMove.getDiaryPictureRotation());
                 mMatrixPictureCanvas.postTranslate(pictureToMove.getDiaryPictureX(), pictureToMove.getDiaryPictureY());
-                mCanvasForMovePicture.drawBitmap(addWhiteBorder(pictureToMove.getBitmapImage(), 4), mMatrixPictureCanvas, null);
+                mCanvasForMovePicture.drawBitmap(addWhiteBorder(BitmapFactory.decodeByteArray(pictureToMove.getByteImage(),0,pictureToMove.getByteImage().length), 4), mMatrixPictureCanvas, null);
                 //mCanvasForMovePicture.drawBitmap(pictureToMove.getBitmapImage(), pictureToMove.getDiaryPictureX(), pictureToMove.getDiaryPictureY(), mPaint);
                 //SE PORTO L'IMMAGINE IN BASSO OLTRE IL BORDO CANCELLO L'IMMAGINE.
-                if((moveY+(pictureToMove.getBitmapImage().getHeight() / 2.5))>iHeight){
+                if((moveY+(BitmapFactory.decodeByteArray(pictureToMove.getByteImage(),0,pictureToMove.getByteImage().length).getHeight() / 3))>iHeight){
                     //Toast.makeText(mContext, "DELETE IMAGE", Toast.LENGTH_LONG).show();
-                    isPirtureDelete=true;
+                    //isPictureDelete =true;
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Delete Image DISABLED!!!");
                 }             
                 //mCanvasForMovePicture.drawBitmap(pictureToMove.getBitmapImage(), moveX-(pictureToMove.getBitmapImage().getWidth()/2), moveY-(pictureToMove.getBitmapImage().getHeight()/2), new Paint());
 
@@ -2437,13 +2480,14 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                                                                                         (int)moveY-(pictureToMove.getBitmapImage().getHeight()/2), pictureToMove.getBitmapImage().getWidth(),
                                                                                         pictureToMove.getBitmapImage().getHeight()), mPaint);*/
 
-                pictureToMove.setDiaryPictureX((int) moveX-(pictureToMove.getBitmapImage().getWidth()/2));
-                pictureToMove.setDiaryPictureY((int) moveY-(pictureToMove.getBitmapImage().getHeight()/2));
+                pictureToMove.setDiaryPictureX((int) moveX-(BitmapFactory.decodeByteArray(pictureToMove.getByteImage(),0,pictureToMove.getByteImage().length).getWidth()/2));
+                pictureToMove.setDiaryPictureY((int) moveY-(BitmapFactory.decodeByteArray(pictureToMove.getByteImage(),0,pictureToMove.getByteImage().length).getHeight()/2));
                 mImages.put(pictureToMove.getDiaryPictureID(), pictureToMove);
             }
             //Metto le altre immagini
             for(DiaryPicture oPicture : sortedImages.values()){
-            	if(oPicture.getBitmapImage()==null) continue;
+            	if(oPicture.getByteImage()==null) continue;
+            	if(BitmapFactory.decodeByteArray(oPicture.getByteImage(),0,oPicture.getByteImage().length)==null) continue;
                 if(mCanvasForMovePicture!=null &&
                         oPicture!=null
                         && oPicture!=pictureToMove){
@@ -2457,13 +2501,14 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                     mMatrixPictureCanvas.postRotate(oPicture.getDiaryPictureRotation());
                     mMatrixPictureCanvas.postTranslate(oPicture.getDiaryPictureX(),oPicture.getDiaryPictureY());
                     //mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(), oPicture.getDiaryPictureX(), oPicture.getDiaryPictureY(), mPaint);
-                    if(!oPicture.getBitmapImage().isRecycled()) mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(), mMatrixPictureCanvas, mPaint);
+                    mCanvasForMovePicture.drawBitmap(BitmapFactory.decodeByteArray(oPicture.getByteImage(),0,oPicture.getByteImage().length), mMatrixPictureCanvas, mPaint);
+
                     //if(!oPicture.getBitmapImage().isRecycled()) mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(), oPicture.getDiaryPictureX(), oPicture.getDiaryPictureY(), mPaint);
                 }
             }
 
             //Aggiungo l'icona per cancellare l'immagine
-            //mCanvasForMovePicture.drawBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.ic_action_delete),iWidth/2,iHeight-50,new Paint());
+            mCanvasForMovePicture.drawBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.ic_action_delete),iWidth/2,iHeight-50,new Paint());
 
             refresh(c);
             //c.drawBitmap(mPictureBitmapForCanvas, 0, 0, new Paint());
@@ -2471,9 +2516,9 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         if (c != null) {
             try{
                 unlockCanvasAndPost(c);
-                //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
             }catch(IllegalArgumentException e){
-                Log.e(this.getClass().getCanonicalName(),"movePicture thread error canvas");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"movePicture thread error canvas");
             }
         	c=null;
         	//mCanvasForMovePicture =null;
@@ -2493,7 +2538,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         synchronized (c) {
             if(mPictureBitmapForCanvas==null){
                 mPictureBitmapForCanvas = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
-                Log.v(this.getClass().getCanonicalName(),"Create Bitmap for move picture");
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Create Bitmap for move picture");
             }
 
 
@@ -2503,7 +2548,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             if(mCanvasForMovePicture ==null){
                 mCanvasForMovePicture = new Canvas();
                 mCanvasForMovePicture.setBitmap(mPictureBitmapForCanvas);
-                Log.v(this.getClass().getCanonicalName(), "Create Canvas for move picture");
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Create Canvas for move picture");
             }
             if(mCanvasForMovePicture!=null &&
                     pictureToMove!=null){
@@ -2511,20 +2556,27 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                 mMatrixPictureCanvas.postRotate(pictureToMove.getDiaryPictureRotation());
                 mMatrixPictureCanvas.postTranslate(pictureToMove.getDiaryPictureX(),pictureToMove.getDiaryPictureY());
                 if(isSelected)
-                    mCanvasForMovePicture.drawBitmap(addWhiteBorder(pictureToMove.getBitmapImage(),4), mMatrixPictureCanvas, null);
+                    //mCanvasForMovePicture.drawBitmap(addWhiteBorder(pictureToMove.getBitmapImage(),4), mMatrixPictureCanvas, null);
+					mCanvasForMovePicture.drawBitmap(addWhiteBorder(BitmapFactory.decodeByteArray(pictureToMove.getByteImage(),0,pictureToMove.getByteImage().length),4), mMatrixPictureCanvas, null);
                 else
-                    mCanvasForMovePicture.drawBitmap(pictureToMove.getBitmapImage(), mMatrixPictureCanvas, null);
+                    //mCanvasForMovePicture.drawBitmap(pictureToMove.getBitmapImage(), mMatrixPictureCanvas, null);
+					mCanvasForMovePicture.drawBitmap(BitmapFactory.decodeByteArray(pictureToMove.getByteImage(),0,pictureToMove.getByteImage().length), mMatrixPictureCanvas, null);
             }
             //Metto le altre immagini
             for(DiaryPicture oPicture : sortedImages.values()){
-                if(oPicture.getBitmapImage()==null) continue;
+                if(oPicture==null) {
+                	continue;
+				}
+				if(oPicture.getByteImage()==null){
+					continue;
+				}
                 if(mCanvasForMovePicture!=null &&
                         oPicture!=null
                         && oPicture!=pictureToMove){
                     mMatrixPictureCanvas.reset();
                     mMatrixPictureCanvas.postRotate(oPicture.getDiaryPictureRotation());
                     mMatrixPictureCanvas.postTranslate(oPicture.getDiaryPictureX(),oPicture.getDiaryPictureY());
-                    if(!oPicture.getBitmapImage().isRecycled()) mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(), mMatrixPictureCanvas, mPaint);
+                    mCanvasForMovePicture.drawBitmap(BitmapFactory.decodeByteArray(oPicture.getByteImage(),0,oPicture.getByteImage().length), mMatrixPictureCanvas, mPaint);
                 }
             }
             refresh(c);
@@ -2532,9 +2584,9 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         if (c != null) {
             try{
                 unlockCanvasAndPost(c);
-                //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
             }catch(IllegalArgumentException e){
-                Log.e(this.getClass().getCanonicalName(),"movePicture thread error canvas");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"movePicture thread error canvas");
             }
             c=null;
         }
@@ -2577,7 +2629,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         synchronized (c) {
             if(mPictureBitmapForCanvas==null){
                 mPictureBitmapForCanvas = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
-                Log.v(this.getClass().getCanonicalName(),"Create Bitmap for move picture");
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Create Bitmap for move picture");
             }
 
 
@@ -2587,7 +2639,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             if(mCanvasForMovePicture ==null){
                 mCanvasForMovePicture = new Canvas();
                 mCanvasForMovePicture.setBitmap(mPictureBitmapForCanvas);
-                Log.v(this.getClass().getCanonicalName(), "Create Canvas for move picture");
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Create Canvas for move picture");
             }
 
             //if(bmpPath!=null) mCanvasForMovePicture.drawBitmap(bmpPath, MatrixPictureCanvas, null);
@@ -2605,7 +2657,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                 mCanvasForMovePicture.drawBitmap(pictureToMove.getBitmapImage(), mMatrixPictureCanvas, paint);
 
                 mImages.put(pictureToMove.getDiaryPictureID(), pictureToMove);
-                Log.v(this.getClass().getCanonicalName(), "Zoom Picture: "+mImageZoom);
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Zoom Picture: "+mImageZoom);
                 
             }
             //Metto le altre immagini
@@ -2633,10 +2685,10 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         if (c != null) {
             try{
                 unlockCanvasAndPost(c);
-                //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
             }catch(IllegalArgumentException e){
                 //TODO
-                Log.e(this.getClass().getCanonicalName(),"zoomPicture thread error canvas");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"zoomPicture thread error canvas");
             }
         	c=null;
         	//mCanvasForMovePicture =null;
@@ -2658,7 +2710,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                     mPictureBitmapForCanvas = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
                     //MatrixPictureCanvas.setRotate(23);
                     //mCanvasForMovePicture.drawBitmap(mPictureBitmapForCanvas,MatrixPictureCanvas,null);
-                    Log.v(this.getClass().getCanonicalName(), "Create Bitmap for move picture");
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Create Bitmap for move picture");
                 }
 
 
@@ -2668,7 +2720,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                 if (mCanvasForMovePicture == null) {
                     mCanvasForMovePicture = new Canvas();
                     mCanvasForMovePicture.setBitmap(mPictureBitmapForCanvas);
-                    Log.v(this.getClass().getCanonicalName(), "Create Canvas for move picture");
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Create Canvas for move picture");
                 }
 
 
@@ -2711,10 +2763,10 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         if (c != null) {
             try{
                 unlockCanvasAndPost(c);
-                //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
             }catch(IllegalArgumentException e){
                 //TODO
-                Log.e(this.getClass().getCanonicalName(),"rotatePicture thread error canvas");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"rotatePicture thread error canvas");
             }
         	c=null;
         	//mCanvasForMovePicture =null;
@@ -2732,8 +2784,8 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             synchronized (c) {
                 mMatrixPictureCanvas = new Matrix();
 
-                mMatrixPictureCanvas.postTranslate(-pictureToRotate.getBitmapImage().getWidth() / 2,
-                        -pictureToRotate.getBitmapImage().getHeight() / 2);
+                mMatrixPictureCanvas.postTranslate(-BitmapFactory.decodeByteArray(pictureToRotate.getByteImage(),0,pictureToRotate.getByteImage().length).getWidth() / 2,
+                        -BitmapFactory.decodeByteArray(pictureToRotate.getByteImage(),0,pictureToRotate.getByteImage().length).getHeight() / 2);
                 mMatrixPictureCanvas.postRotate(rotation);
                 mMatrixPictureCanvas.postTranslate(pictureToRotate.getDiaryPictureX(),
                         pictureToRotate.getDiaryPictureY());
@@ -2759,11 +2811,11 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                     paint.setColor(Color.WHITE);
                     paint.setStyle(Paint.Style.FILL);
                     paint.setStrokeWidth(2);
-                    mCanvasForMovePicture.drawBitmap(addWhiteBorder(pictureToRotate.getBitmapImage(),4),mMatrixPictureCanvas,paint);
+                    mCanvasForMovePicture.drawBitmap(addWhiteBorder(BitmapFactory.decodeByteArray(pictureToRotate.getByteImage(),0,pictureToRotate.getByteImage().length),4),mMatrixPictureCanvas,paint);
 
                     pictureToRotate.setDiaryPictureRotation((int) rotation);
                     mImages.put(pictureToRotate.getDiaryPictureID(), pictureToRotate);
-                    //Log.v(this.getClass().getCanonicalName(), "Real rotate picture: "+rotation);
+                    //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Real rotate picture: "+rotation);
                 }
                 if (sortedImages == null) return;
                 //Metto le altre immagini
@@ -2773,11 +2825,11 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                             oPicture != null &&
                                 oPicture!=pictureToRotate) {
 
-                        if (!oPicture.getBitmapImage().isRecycled()) {
+                        if (!BitmapFactory.decodeByteArray(oPicture.getByteImage(),0,oPicture.getByteImage().length).isRecycled()) {
                             mMatrixPictureCanvas.reset();
                             mMatrixPictureCanvas.postRotate(oPicture.getDiaryPictureRotation());
                             mMatrixPictureCanvas.postTranslate(oPicture.getDiaryPictureX(), oPicture.getDiaryPictureY());
-                            mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(),mMatrixPictureCanvas,null);
+                            mCanvasForMovePicture.drawBitmap(BitmapFactory.decodeByteArray(oPicture.getByteImage(),0,oPicture.getByteImage().length),mMatrixPictureCanvas,null);
                             //mCanvasForMovePicture.drawBitmap(oPicture.getBitmapImage(), oPicture.getDiaryPictureX(), oPicture.getDiaryPictureY(), mPaint);
                         }
                     }
@@ -2790,10 +2842,10 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
         if (c != null) {
             try{
                 unlockCanvasAndPost(c);
-                //Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"unlockCanvasAndPost 2 Canvas");
             }catch(IllegalArgumentException e){
                 //TODO
-                Log.e(this.getClass().getCanonicalName(),"rotatePicture thread error canvas");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"rotatePicture thread error canvas");
             }
             c=null;
         }
@@ -2803,29 +2855,24 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
      *
      * */
     private void deletePicture(){
-        File _FileToDelete = new File(mPictureToMove.getDiaryImageURI());
-        if(_FileToDelete.exists()){
-            if(_FileToDelete.delete()){
-            	mImages.remove(mPictureToMove.getDiaryPictureID());
-                DeletePictureAsyncTask asyncTask = new DeletePictureAsyncTask(mCurrentPage, mContext);
-                asyncTask.execute(mPictureToMove.getDiaryPictureID());
-                Toast.makeText(mContext, mContext.getString(R.string.delete), Toast.LENGTH_SHORT).show();              
-            }
-        }else{
-            //Cancello l'immagine anche se non esiste il file
-        	mImages.remove(mPictureToMove.getDiaryPictureID());
-            DeletePictureAsyncTask asyncTask = new DeletePictureAsyncTask(mCurrentPage, mContext);
-            asyncTask.execute(mPictureToMove.getDiaryPictureID());
-            Toast.makeText(mContext, mContext.getString(R.string.delete), Toast.LENGTH_SHORT).show();           
-        }
-        if(mPictureToMove!=null && mPictureToMove.getBitmapImage()!=null) mPictureToMove.getBitmapImage().recycle();
+
+		mImages.remove(mPictureToMove.getDiaryPictureID());
+		DeletePictureAsyncTask asyncTask = new DeletePictureAsyncTask(mCurrentPage, mContext);
+		asyncTask.execute(mPictureToMove.getDiaryPictureID());
+		Toast.makeText(mContext, mContext.getString(R.string.delete), Toast.LENGTH_SHORT).show();
+
+		if(mPictureToMove!=null &&
+				BitmapFactory.decodeByteArray(mPictureToMove.getByteImage(),0,mPictureToMove.getByteImage().length)!=null && !
+				BitmapFactory.decodeByteArray(mPictureToMove.getByteImage(),0,mPictureToMove.getByteImage().length).isRecycled()) BitmapFactory.decodeByteArray(mPictureToMove.getByteImage(),0,mPictureToMove.getByteImage().length).recycle();
+
         // Get instance of Vibrator from current Context
         Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
 
         // Vibrate for 300 milliseconds
-        v.vibrate(150);
+		v.vibrate(VibrationEffect.createOneShot(150l,1));
+        //v.vibrate(150);
         mPictureToMove=null;
-        isPirtureDelete=false;
+        isPictureDelete =false;
     }
 	/***
 	 * TASK ASINCRONI
@@ -2833,7 +2880,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 	 * 
 	 * **/
 	
-	class PictureRotateTask extends  AsyncTask<Void, Void, Boolean> {
+	/*class PictureRotateTask extends  AsyncTask<Void, Void, Boolean> {
 		
 		private DiaryPicture mPictureToSave;
 		private String mFileName;
@@ -2857,7 +2904,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
             File tmpImg = new File(mPictureToSave.getDiaryImageURI());
             if(!tmpImg.exists()) return false;
 			//Ruoto l'immagine originale e quella scalata
-			Bitmap immutable = BitmapFactory.decodeFile(mPictureToSave.getDiaryImageURI());
+			Bitmap immutable = BitmapFactory.decodeByteArray(mPictureToSave.getByteImage(),0,mPictureToSave.getByteImage().length);
 			Bitmap mOrigianlImage=null;
 			if(immutable!=null){
 				mOrigianlImage = immutable.copy(Bitmap.Config.ARGB_8888, true);
@@ -2880,17 +2927,17 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
                         out = new FileOutputStream(mFile);
                         if(mCompress==null){
                              mCompress=Bitmap.CompressFormat.JPEG;
-                             Log.v(this.getClass().getCanonicalName(),"Compress JPEG");
+                             if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Compress JPEG");
                         }
                         newRotateImage.compress(mCompress, 90, out);
                         out.close();
                         out=null;
-                        Log.v(this.getClass().getCanonicalName(),"Save Rotate image: "+mFileName);
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Save Rotate image: "+mFileName);
                     }else{
-                        Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+                        if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
                     }
                 } catch (IOException e) {
-                    Log.e(this.getClass().getCanonicalName(),"Error saving image");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error saving image");
                 }
             }
         	//Reimposto il bitmap scalato
@@ -2900,13 +2947,13 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 			
 			File tmpImgFile = new File(mFileName);
             if(!tmpImgFile.exists()) return false;
-			mPictureToSave.setBitmapImage(BitmapFactory.decodeFile(mFileName, options));
+			mPictureToSave.setBitmapImage(BitmapFactory.decodeByteArray(mPictureToSave.getByteImage(),0,mPictureToSave.getByteImage().length,options));
 			return DiaryRepositoryHelper.updatePicturePosition(mContext, mPictureToSave);
 		}
 
         @Override
         protected void onPreExecute() {
-            oWaitForPage = ProgressDialog.show(mContext,mContext.getString(R.string.app_name),mContext.getString(R.string.wait),true,true,null);
+            oWaitForPage = ProgressDiaif(Const.DEVELOPER_MODE) Log.show(mContext,mContext.getString(R.string.app_name),mContext.getString(R.string.wait),true,true,null);
             super.onPreExecute();
         }
 
@@ -2916,9 +2963,9 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 			rotatePicture(mPictureToMove);
 			super.onPostExecute(result);
 		}
-		/**
+		*//**
 		 * calcola il sample size
-		 * */
+		 * *//*
 		public int calculateInSampleSize() {
 		    // Raw height and width of image
 		    final int height = Const.IMGHEIGHT;
@@ -2926,7 +2973,7 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 		    int inSampleSize = 1;
 		    int reqHeight = iWidth/Const.SAMPLESIZEIMAGE;
 		    int reqWidth = iHeight/Const.SAMPLESIZEIMAGE;
-		    //Log.v(BitmapFactoryHelper.class.getClass().getCanonicalName(),"reqWidth: "+reqWidth+" reqHeight:"+reqHeight);
+		    //if(Const.DEVELOPER_MODE) Log.v(BitmapFactoryHelper.class.getClass().getCanonicalName(),"reqWidth: "+reqWidth+" reqHeight:"+reqHeight);
 		    if (height > reqHeight || width > reqWidth) {
 		
 		        // Calculate ratios of height and width to requested height and width
@@ -2938,10 +2985,10 @@ public class TextureHandWrite extends TextureView implements TextureView.Surface
 		        // requested height and width.
 		        inSampleSize = heightRatio < widthRatio ? widthRatio : heightRatio;
 		    }
-		    //Log.v(BitmapFactoryHelper.class.getClass().getCanonicalName(),"Sample rate: "+inSampleSize+" outH:"+height+" outW:"+width);
+		    //if(Const.DEVELOPER_MODE) Log.v(BitmapFactoryHelper.class.getClass().getCanonicalName(),"Sample rate: "+inSampleSize+" outH:"+height+" outW:"+width);
 		    return inSampleSize;
 		}
-	}
+	}*/
 	class PictureTask extends  AsyncTask<Void, Void, Boolean> {
 	
 		private DiaryPicture mPictureToSave;

@@ -169,15 +169,16 @@ public class PdfBuilder {
         //Add HandWrite if Present
         Image img = null;
         try {
-            File otmp = new File(mPathToPdf+"/Pictures/h"+page.getPageID()+Const.PAGE_PREVIEW_EXT);
-            if(otmp.exists()){
-                img = Image.getInstance(mPathToPdf+"/Pictures/h"+page.getPageID()+Const.PAGE_PREVIEW_EXT);
+            //File otmp = new File(mPathToPdf+"/Pictures/h"+page.getPageID()+Const.PAGE_PREVIEW_EXT);
+            //if(otmp.exists()){
+                //img = Image.getInstance(mPathToPdf+"/Pictures/h"+page.getPageID()+Const.PAGE_PREVIEW_EXT);
+				img = Image.getInstance(page.getByteImagePreviewPage());
                 /*Ridimensiono l' immagine*/
                 img.scaleAbsolute(mPageWidth,mPageHeigth);
                 img.setAbsolutePosition(0,0);
                 pagePDF.add(img);
-            }
-            otmp=null;
+            //}
+           //otmp=null;
         } catch (BadElementException e) {
             e.printStackTrace();
             Log.e(this.getClass().getCanonicalName(),"BadElementException inserting image to PDF");
@@ -200,8 +201,9 @@ public class PdfBuilder {
             Row oRow = page.getPageRows().get(keys.nextElement());
             Image img = null;
             try {
-                img = Image.getInstance(mPathToPdf + "/Pictures/" + page.getPageID() + Const.CAMERA_PREVIEW_EXT);
+                //img = Image.getInstance(mPathToPdf + "/Pictures/" + page.getPageID() + Const.CAMERA_PREVIEW_EXT);
                     /*Ridimensiono l' immagine*/
+				img = Image.getInstance(page.getByteImagePreviewPage());
                 img.scaleAbsolute(mPageWidth,mPageHeigth);
                 img.setAbsolutePosition(0,0);
                 pagePDF.add(img);

@@ -1,5 +1,6 @@
 package com.glm.labs.diary.ememories;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Environment;
 
@@ -36,7 +37,7 @@ public class Const {
     public static final int DATE_DAY_OFFSET_X = 1225;
 
     /**Cartella di storage esterna*/
-    public static final String EXTDIR = Environment.getExternalStorageDirectory().getPath() + "/";
+    public static final String EXTDIR = null;//Context.getFilesDir().getPath() + "";//Environment.getExternalStorageDirectory().getPath() + "/";
     /**Cartella di storage interna*/
     public static final String INTERNALDIR = Environment.getDataDirectory() + "/data/";
     /**identifica il fattore di moltipricazione per la dimensione del finger*/
@@ -81,4 +82,5 @@ public class Const {
     public static final int colorTheme6 =  Color.parseColor("#F44336");
     //public static final String ADS_APP_PACKAGE_NAME="com.glm.diary.ememories";
     public static final String ADS_APP_PACKAGE_NAME="com.glm.diary.ememories";
+    public static final int PERMISSION_WRITE_EXTERNAL_STORAGE_CODE = 2;
 }

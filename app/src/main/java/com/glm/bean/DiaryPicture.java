@@ -1,6 +1,9 @@
 package com.glm.bean;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import java.io.ByteArrayOutputStream;
 
 public class DiaryPicture {
 
@@ -9,7 +12,7 @@ public class DiaryPicture {
 	private long PageID;
 	
 	private String DiaryImageURI;
-	
+
 	private int DiaryPictureH;
 	
 	private int DiaryPictureW;
@@ -21,6 +24,8 @@ public class DiaryPicture {
 	private int DiaryPictureY;
 	/**identifica se l'immagine e una writehand*/
 	private boolean DiaryHandImage=false;
+
+	private byte[] byteImage;
 
 	private Bitmap bitmapImage;
 	/**
@@ -153,7 +158,13 @@ public class DiaryPicture {
 	 * @return the bitmapImage
 	 */
 	public synchronized Bitmap getBitmapImage() {
-		return bitmapImage;
+		if(this.bitmapImage==null){
+			if(this.byteImage!=null){
+				this.bitmapImage = BitmapFactory.decodeByteArray(this.byteImage,0,this.byteImage.length);
+				return this.bitmapImage;
+			}
+		}
+		return this.bitmapImage;
 	}
 
 	/**
@@ -161,7 +172,24 @@ public class DiaryPicture {
 	 */
 	public synchronized void setBitmapImage(Bitmap bitmapImage) {
 		this.bitmapImage = bitmapImage;
+		this.setByteImage();
 	}
 
-	
+	public synchronized byte[] getByteImage() {
+		return this.byteImage;
+	}
+
+	private synchronized void setByteImage() {
+		if(this.bitmapImage!=null){
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			this.bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+			byte[] byteArray = stream.toByteArray();
+			this.bitmapImage.recycle();
+			this.byteImage = byteImage;
+		}
+	}
+
+	public synchronized void setByteImage(byte[] streamBytes){
+			this.byteImage = streamBytes;
+	}
 }

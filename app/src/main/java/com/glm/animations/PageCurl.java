@@ -126,11 +126,11 @@ public class PageCurl {
 
 	public void loadGLTexture(GL10 gl, Context context, String sPathImage,Page page) {
 		//InputStream is = context.getResources().openRawResource(R.drawable.page);
-		String mFileName=sPathImage+"/"+page.getPageID()+ Const.CAMERA_PREVIEW_EXT;
+		//String mFileName=sPathImage+"/"+page.getPageID()+ Const.CAMERA_PREVIEW_EXT;
 		//File oFile= new File(mFileName);
 		Bitmap bitmap = null;
 		
-		bitmap = BitmapFactory.decodeFile(mFileName);
+		//bitmap = BitmapFactory.decodeFile(mFileName);
 		if(bitmap==null) return;
 
 		gl.glGenTextures(1, textures, 0);

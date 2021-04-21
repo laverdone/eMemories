@@ -23,7 +23,9 @@ public interface PictureTable extends BaseColumns {
 	String DIARYID = "diaryid";
 	
 	String PAGEID = "pageid";
-	
+
+	String PICTUREPREVIEW = "picturpreview";
+
 	String PICTUREURI = "pictureuri";
 	
 	String PICTUREH = "pictureh";
@@ -38,5 +40,5 @@ public interface PictureTable extends BaseColumns {
 	
 	String PICTUREHAND = "picturehand";
 	
-	String[] COLUMNS = new String[] {PICTUREID, DIARYID, PAGEID, PICTUREURI, PICTUREH, PICTUREW, PICTUREROTATION, PICTUREX, PICTUREY,PICTUREHAND};
+	String[] COLUMNS = new String[] {PICTUREID, DIARYID, PAGEID, PICTUREPREVIEW, PICTUREURI, PICTUREH, PICTUREW, PICTUREROTATION, PICTUREX, PICTUREY,PICTUREHAND};
 }

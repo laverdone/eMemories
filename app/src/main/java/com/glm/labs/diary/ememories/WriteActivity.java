@@ -2,15 +2,12 @@ package com.glm.labs.diary.ememories;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -24,42 +21,42 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.glm.bean.Diary;
 import com.glm.bean.DiaryPicture;
@@ -67,16 +64,20 @@ import com.glm.bean.Page;
 import com.glm.db.DiaryRepositoryHelper;
 import com.glm.db.Repository;
 import com.glm.ememories.R;
-import com.glm.utilities.BitmapFactoryHelper;
 import com.glm.utilities.DiaryHelper;
 import com.glm.utilities.PdfBuilder;
 import com.glm.utilities.adapter.ImageFilterListAdapter;
-import com.glm.utilities.animation.FlipAnimation;
 import com.glm.utilities.image.ImageFilters;
 import com.glm.view.ColorPickerView;
 import com.glm.view.SlidingLayer;
-import com.glm.view.TextureHandWrite;
+import com.glm.view.PaperSurface;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -89,10 +90,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
-
-
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 
 public class WriteActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -111,7 +108,10 @@ public class WriteActivity extends AppCompatActivity
     /**Contiene tutte le image view delle preview*/
     private ArrayList<ImageView> mPagesPreview = new ArrayList<ImageView>();
     /**SurfaceView per scrittura immagini e path*/
-    private TextureHandWrite oSurface;
+    //private TextureHandWrite oSurface;
+
+    private PaperSurface oSurface;
+
     /**Vecchia Pagina*/
     private ImageView oOldPage;
     //private PageCurlView oSurface;
@@ -141,7 +141,6 @@ public class WriteActivity extends AppCompatActivity
 
     private int mWidth;
     private int mHeight;
-    private MenuItem mMenuEdit;
     private long mCurrentPageID;
     private int statusBarHeight=19;
     private static final int LOW_DPI_STATUS_BAR_HEIGHT = 19;
@@ -151,7 +150,7 @@ public class WriteActivity extends AppCompatActivity
     private FloatingActionButton oColorPickerBtn;
     private Button oColorSelected;
     private ColorPickerView oColorPicker;
-
+    private Menu mMenu;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -162,19 +161,11 @@ public class WriteActivity extends AppCompatActivity
         Resources res = getResources();
         mSideBarW = res.getDimension(R.dimen.sideBar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         mMainLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mMainLayout, oToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mMainLayout.setDrawerListener(toggle);
+        //mMainLayout.setDrawerListener(toggle);
+        mMainLayout.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -221,7 +212,7 @@ public class WriteActivity extends AppCompatActivity
             oDiariesAsync.execute();
         }
 
-        Log.v(this.getClass().getCanonicalName(), "on Create WritePage");
+        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "on Create WritePage");
 
         if(getPackageName().equals(Const.ADS_APP_PACKAGE_NAME)){
             AdView mAdView = (AdView) findViewById(R.id.adView);
@@ -238,6 +229,7 @@ public class WriteActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.write_page_options_menu_dark, menu);
+        mMenu=menu;
         return true;
     }
 
@@ -268,9 +260,9 @@ public class WriteActivity extends AppCompatActivity
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     if(requestCode==0){
-                        //Take from Camera
-                        BitmapWorkerTask oBitmapWorkerTask= new BitmapWorkerTask(null, i);
-                        oBitmapWorkerTask.execute();
+                        //Take from Camera NEVER USER
+                        /*BitmapWorkerTask oBitmapWorkerTask= new BitmapWorkerTask(null, i);
+                        oBitmapWorkerTask.execute();*/
                     }else if(requestCode==1){
                         //Take from Gallery
                         GalleryWorkerTask oGalleryWorkerTask= new GalleryWorkerTask(data, i);
@@ -296,23 +288,25 @@ public class WriteActivity extends AppCompatActivity
     public void onBackPressed() {
         //if(!oSurface.isWritable()){
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        mMenu.performIdentifierAction(R.id.save, 0);
+        /*try {
+            if(oSurface!=null) oSurface.freeBitmap();
+            mBitmap = oSurface.getBitmap(mWidth / 2, mHeight / 2);
+            SaveDiaryTask oSaveDiary = new SaveDiaryTask(this,true);
+            oSaveDiary.execute();
+        }catch(java.lang.OutOfMemoryError e){
+            if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Out Of Memory");
+            SaveDiaryTask oSaveDiary = new SaveDiaryTask(this,true);
+            oSaveDiary.execute();
+        }*/
+
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
-
-        try {
-            oSurface.freeBitmap();
-            mBitmap = oSurface.getBitmap(mWidth / 2, mHeight / 2);
-            SaveDiaryTask oSaveDiary = new SaveDiaryTask(this,true);
-            oSaveDiary.execute();
-        }catch(java.lang.OutOfMemoryError e){
-            Log.e(this.getClass().getCanonicalName(),"Out Of Memory");
-            SaveDiaryTask oSaveDiary = new SaveDiaryTask(this,true);
-            oSaveDiary.execute();
-        }
-
         /*}else{
             oSurface.fireUndo();
         }*/
@@ -332,9 +326,9 @@ public class WriteActivity extends AppCompatActivity
             case R.id.save:
 
                 forceCloseKeyboard();
-                Log.v(this.getClass().getCanonicalName(),"Save page");
-                //Log.i(this.getClass().getCanonicalName(),"json: "+oGson.toJson(mDiary));
-                mBitmap=oSurface.getBitmap(mWidth/2,mHeight/2);
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Save page");
+                //if(Const.DEVELOPER_MODE) Log.i(this.getClass().getCanonicalName(),"json: "+oGson.toJson(mDiary));
+                mBitmap=oSurface.getBitmap();
                 if(oSurface.isWritable()) oSurface.setWritable(false);
                 SaveDiaryTask oSaveDiary = new SaveDiaryTask(this,false);
                 oSaveDiary.execute();
@@ -343,6 +337,8 @@ public class WriteActivity extends AppCompatActivity
                 //saveHandWrite(false);
                 break;
             case R.id.newPage:
+                SaveDiaryTask oSaveDiary1 = new SaveDiaryTask(this,false);
+                oSaveDiary1.execute();
                 selectPageFormat();
 
                 //createBitmapFromPage(false);
@@ -403,32 +399,30 @@ public class WriteActivity extends AppCompatActivity
 
                 break;
             case R.id.clearPage:
-                /*Cancella l'handWrite Page
-                File oFileToDelete = new File(sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
-                if(oFileToDelete.exists()){
-                    oFileToDelete.delete();
-                    oSurface.freeBitmap();
-                    loadDiary();
-                }*/
 
+                Snackbar.make(oSurface, R.string.eraser, Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
 
+                SaveDiaryTask oSaveDiary2 = new SaveDiaryTask(this,false);
+                oSaveDiary2.execute();
 
 
 
                 if(!oSurface.isWritable()) oSurface.setWritable(true);
                 oSurface.setPage(mCurrentPage);
 
-                oSurface.setColor(Color.BLACK);
+                //oSurface.setColor(Color.BLACK);
                 oSurface.setStrokeWidth(mCurrentStrokeWidth*20);
                 oSurface.setDeleteMode(true);
+                oSurface.postInvalidate();
                 break;
             case R.id.photo:
                 //saveHandWrite(true);
                 //PageAsyncTask = new SavePageAsyncTask(this, mPage, getApplicationContext());
                 //PageAsyncTask.execute(mCurrentPage);
                 //oSurface.setWritable(false);
-                SaveDiaryTask oSaveDiary1 = new SaveDiaryTask(this,false);
-                oSaveDiary1.execute();
+                /*SaveDiaryTask oSaveDiary1 = new SaveDiaryTask(this,false);
+                oSaveDiary1.execute();*/
 
 
                 takePhoto();
@@ -448,7 +442,7 @@ public class WriteActivity extends AppCompatActivity
             case android.R.id.home:
                 forceCloseKeyboard();
                 onBackPressed();
-                Log.v(this.getClass().getCanonicalName(),"Home Pressed");
+                if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Home Pressed");
 
                 break;
         }
@@ -523,7 +517,8 @@ public class WriteActivity extends AppCompatActivity
             };
             // Set the drawer toggle as the DrawerListener
             mMainLayout.setDrawerListener(mDrawerToggle);*/
-            oSurface 		= new TextureHandWrite(this, mDiary, mCurrentPage);
+            //oSurface 		= new TextureHandWrite(this, mDiary, mCurrentPage);
+            oSurface 		= new PaperSurface(this, mDiary, mCurrentPage);
             //oSurface 		= new PageCurlView(this, mDiary, mCurrentPage);
             oScrollView     = new ScrollView(this);
             oLinearLayout   = new LinearLayout(this);
@@ -545,14 +540,14 @@ public class WriteActivity extends AppCompatActivity
                 //System.gc();
             }
             setRequestedOrientation(mCurrentPage.getPageOrientation());
-            new Thread(new Runnable() {
+            /*new Thread(new Runnable() {
                 @Override
                 public void run() {
                     File shareDelete = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_SHARE_EXT);
                     shareDelete.delete();
                     shareDelete=null;
                 }
-            }).start();
+            }).start();*/
 
         }
 
@@ -575,7 +570,7 @@ public class WriteActivity extends AppCompatActivity
         oScrollView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                //Log.v(this.getClass().getCanonicalName(),"Touch Scrool");
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Touch Scrool");
                 oSurface.onTouchEvent(motionEvent);
                 return false;
             }
@@ -786,6 +781,31 @@ public class WriteActivity extends AppCompatActivity
         //oSurface.drawEmptyPage();
         // oSurface.drawTextOnSurface();
         //oSurface.createCanvasBackground();
+        /*if(mCurrentPage.getByteImagePreviewPage().length==mCurrentPage.getByteImageHW().length){
+            Log.v(this.getClass().getCanonicalName(),"################# IMMAGINI UGUALI###############");
+        }else{
+            Log.v(this.getClass().getCanonicalName(),"################# IMMAGINI DIVERSE###############");
+        }
+        Bitmap decodedByte1 = BitmapFactory.decodeByteArray(mCurrentPage.getByteImagePreviewPage(), 0, mCurrentPage.getByteImagePreviewPage().length);
+        Bitmap decodedByte2 = BitmapFactory.decodeByteArray(mCurrentPage.getByteImageHW(), 0, mCurrentPage.getByteImageHW().length);
+        ImageView a = new ImageView(this);
+        a.setImageBitmap(decodedByte1);
+        ImageView b = new ImageView(this);
+        b.setImageBitmap(decodedByte2);
+        if(mCurrentPage.getByteImagePreviewPage().length==mCurrentPage.getByteImageHW().length){
+            Log.v(this.getClass().getCanonicalName(),"################# IMMAGINI UGUALI###############"+b.getHeight());
+            Log.v(this.getClass().getCanonicalName(),"BH: "+decodedByte1.getHeight()+ " BW: "+decodedByte1.getWidth()+" AH: "+decodedByte2.getHeight()+ " AW: "+decodedByte2.getWidth());
+
+        }else{
+            Log.v(this.getClass().getCanonicalName(),"################# IMMAGINI DIVERSE###############");
+            Log.v(this.getClass().getCanonicalName(),"BH: "+decodedByte1.getHeight()+ " BW: "+decodedByte1.getWidth()+" AH: "+decodedByte2.getHeight()+ " AW: "+decodedByte2.getWidth());
+
+        }
+
+        mPageLayout.removeAllViews();
+        mPageLayout.addView(a);*/
+        //mPageLayout.addView(b);
+
     }
 
     public void saveFromDeleted(){
@@ -800,7 +820,7 @@ public class WriteActivity extends AppCompatActivity
      * */
     private void sharePage() {
         try{
-            mBitmap =  oSurface.getBitmap(mWidth,mHeight);
+            mBitmap =  oSurface.getBitmap();
 
             AsyncTask.execute(new Runnable() {
 
@@ -808,36 +828,38 @@ public class WriteActivity extends AppCompatActivity
                 @Override
                 public void run() {
                     if(sPathImage==null) return;
-                    File dir = new File(sPathImage);
+                   /* File dir = new File(sPathImage);
                     File mFile=null;
                     if(!dir.exists()) {
                         dir.mkdirs();
-                    }
+                    }*/
 
                     //Task async per salvare l'immagine.
 
                     try {
                         if(mBitmap!=null){
-                            mFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_SHARE_EXT);
+                            /*mFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_SHARE_EXT);
                             FileOutputStream out = new FileOutputStream(mFile);
 
                             mBitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
                             out.close();
-                            out=null;
+                            out=null;*/
                             MimeTypeMap mime = MimeTypeMap.getSingleton();
                             String type = mime.getMimeTypeFromExtension("png");
                             Intent sharingIntent = new Intent("android.intent.action.SEND");
                             sharingIntent.setType(type);
-                            sharingIntent.putExtra("android.intent.extra.STREAM",Uri.fromFile(mFile));
+                            //sharingIntent.putExtra("android.intent.extra.STREAM",Uri.fromFile(mFile));
+                            sharingIntent.putExtra("CapturedImage", mCurrentPage.getByteImagePreviewPage());
+                            //TODO VERIFICARE
                             sharingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(Intent.createChooser(sharingIntent,"Share using"));
 
 
                         }else{
-                            Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+                            if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
                         }
-                    } catch (IOException e) {
-                        Log.e(this.getClass().getCanonicalName(),"Error saving image");
+                    } catch (Exception e) {
+                        if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error saving image");
                     }
 
                 }
@@ -846,7 +868,7 @@ public class WriteActivity extends AppCompatActivity
             });
 
         }catch (Exception e) {
-            Log.e(this.getClass().getCanonicalName(), "sharing error:"+e.getMessage());
+            if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(), "sharing error:"+e.getMessage());
         }
     }
 
@@ -952,6 +974,7 @@ public class WriteActivity extends AppCompatActivity
     public void loadPictureAfterResize(){
         Date date = new Date();
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
         long mPictureID=0;
         try{
             mPictureID=Long.parseLong(df.format(date));
@@ -962,29 +985,36 @@ public class WriteActivity extends AppCompatActivity
         if(mImages==null) mImages = new Hashtable<Long, DiaryPicture>();
 
         if(oScaledSizeBmp!=null){
-            File tmpImgFile = new File(sPathImage+"/"+sImageName);
-            if(!tmpImgFile.exists()) return;
+            oScaledSizeBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
             BitmapFactory.Options options = new BitmapFactory.Options();
-            //options.inSampleSize=Const.SAMPLESIZEIMAGE;
             options.inSampleSize=calculateInSampleSize();
+            BitmapFactory.decodeByteArray(byteArray,0,byteArray.length,options).compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArrayScaled = stream.toByteArray();
+            //File tmpImgFile = new File(sPathImage+"/"+sImageName);
+            //if(!tmpImgFile.exists()) return;
+            //options.inSampleSize=Const.SAMPLESIZEIMAGE;
 
+            //TOD QUI Salvare byte[]
             DiaryPicture oPicture = new DiaryPicture();
             oPicture.setDiaryImageURI(sPathImage+"/"+sImageName);
             oPicture.setPageID(mCurrentPage.getPageID());
-            //TODO oPicture.setDiaryPictureView(oImg);
+            oPicture.setByteImage(byteArrayScaled); //setDiaryPictureView(oImg);
             oPicture.setDiaryPictureX(mWidth/2);
             oPicture.setDiaryPictureY(mHeight/2);
             oPicture.setDiaryPictureW(oScaledSizeBmp.getWidth());
             oPicture.setDiaryPictureH(oScaledSizeBmp.getHeight());
             //oPicture.setDiaryPictureRotation((int) oImg.getRotation());
             //TODO Strinct Mode ALERT
-            oPicture.setBitmapImage(BitmapFactory.decodeFile(sPathImage+"/"+sImageName, options));
+            oPicture.setBitmapImage(oScaledSizeBmp);
             oPicture.setDiaryPictureID(mPictureID);
+            //SALVO L'IMMAGINE IN SQLite
+            DiaryRepositoryHelper.dumpPageImage(getApplicationContext(),oPicture,byteArray);
             mImages.put(mPictureID, oPicture);
             mCurrentPage.setDiaryImage(mImages);
             //oSurface.addPicture(oPicture, oScaledSizeBmp);
             oSurface.drawTextOnSurface();
-            oScaledSizeBmp.recycle();
+            //oScaledSizeBmp.recycle();
         }
 
         //TODO caricare il surface con la nuova immagine
@@ -1088,13 +1118,13 @@ public class WriteActivity extends AppCompatActivity
                 //saveHandWrite(false);
 
                 try {
-                    oSurface.freeBitmap();
-                    mBitmap=oSurface.getBitmap(mWidth/2,mHeight/2);
+
+                    //mBitmap=oSurface.getBitmap(mWidth/2,mHeight/2);
                     SavePageTask oSavePage = new SavePageTask(getApplicationContext(), ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                     oSavePage.execute();
                     if(oSurface.isWritable()) oSurface.setWritable(false);
                 }catch(java.lang.OutOfMemoryError e){
-                    Log.e(this.getClass().getCanonicalName(),"Out Of Memory");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Out Of Memory");
                     SavePageTask oSavePage = new SavePageTask(getApplicationContext(),ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                     oSavePage.execute();
                     if(oSurface.isWritable()) oSurface.setWritable(false);
@@ -1114,12 +1144,12 @@ public class WriteActivity extends AppCompatActivity
 
                 try {
                     oSurface.freeBitmap();
-                    mBitmap=oSurface.getBitmap(mWidth/2,mHeight/2);
+                    //mBitmap=oSurface.getBitmap();
                     SavePageTask oSavePage = new SavePageTask(getApplicationContext(),ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                     oSavePage.execute();
                     if(oSurface.isWritable()) oSurface.setWritable(false);
                 }catch(java.lang.OutOfMemoryError e){
-                    Log.e(this.getClass().getCanonicalName(),"Out Of Memory");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Out Of Memory");
                     SavePageTask oSavePage = new SavePageTask(getApplicationContext(),ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                     oSavePage.execute();
                     if(oSurface.isWritable()) oSurface.setWritable(false);
@@ -1235,7 +1265,7 @@ public class WriteActivity extends AppCompatActivity
     /**
      * Prende una nuova immagine dalla galleria o dalla camera,
      *
-     *
+     * @deprecated prendo solo dalla galleria per il momento
      * */
     private void takePhoto() {
         // Take from gallery
@@ -1256,7 +1286,7 @@ public class WriteActivity extends AppCompatActivity
 
             Date date = new Date();
             DateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-            sImageName=df.format(date) + Const.CAMERA_PREVIEW_EXT;
+            //sImageName=df.format(date) + Const.CAMERA_PREVIEW_EXT;
 				/*gestione Foto*/
             File file = new File(dir, sImageName);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, android.net.Uri.fromFile(file));
@@ -1290,7 +1320,7 @@ public class WriteActivity extends AppCompatActivity
         int inSampleSize = 1;
         int reqHeight = mWidth/Const.SAMPLESIZEIMAGE;
         int reqWidth = mHeight/Const.SAMPLESIZEIMAGE;
-        //Log.v(BitmapFactoryHelper.class.getClass().getCanonicalName(),"reqWidth: "+reqWidth+" reqHeight:"+reqHeight);
+        //if(Const.DEVELOPER_MODE) Log.v(BitmapFactoryHelper.class.getClass().getCanonicalName(),"reqWidth: "+reqWidth+" reqHeight:"+reqHeight);
         if (height > reqHeight || width > reqWidth) {
 
             // Calculate ratios of height and width to requested height and width
@@ -1302,7 +1332,7 @@ public class WriteActivity extends AppCompatActivity
             // requested height and width.
             inSampleSize = heightRatio < widthRatio ? widthRatio : heightRatio;
         }
-        //Log.v(BitmapFactoryHelper.class.getClass().getCanonicalName(),"Sample rate: "+inSampleSize+" outH:"+height+" outW:"+width);
+        //if(Const.DEVELOPER_MODE) Log.v(BitmapFactoryHelper.class.getClass().getCanonicalName(),"Sample rate: "+inSampleSize+" outH:"+height+" outW:"+width);
         return inSampleSize;
     }
     /**
@@ -1333,7 +1363,7 @@ public class WriteActivity extends AppCompatActivity
             }
 
 
-            Log.v(this.getClass().getCanonicalName(), "Exif orientation: " + orientation);
+            if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Exif orientation: " + orientation);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1349,7 +1379,7 @@ public class WriteActivity extends AppCompatActivity
         Hashtable<Long, Page> mPages = (Hashtable<Long, Page>) mDiary.getDiaryPages();
         Map<Long, Page> sortedImages = new TreeMap<Long, Page>(mPages);
 
-        for(final Page oPpage : sortedImages.values()){
+        for(final Page oPage : sortedImages.values()){
             //Immagine Corrente per il diario
 
             ImageView imageView;// = (ImageView) mPagePreview.findViewById(R.id.imgPreview);
@@ -1359,20 +1389,25 @@ public class WriteActivity extends AppCompatActivity
             imageView.setLayoutParams(vp);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setPadding(8, 4, 8, 4);
-            //Log.v(this.getClass().getCanonicalName(),"Load Preview Page: "+oPpage.getPageID());
+            //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Load Preview Page: "+oPpage.getPageID());
 
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize=Const.SAMPLESIZEDIARY;
 
-            File checkFile = new File(sPathImage + "/" + oPpage.getPageID() + Const.CAMERA_PREVIEW_EXT);
-            if(checkFile.exists()){
-                imageView.setImageBitmap(BitmapFactory.decodeFile(sPathImage + "/" + oPpage.getPageID() + Const.CAMERA_PREVIEW_EXT, options));
-            }else{
-                //Impossibile trovale la previe, ne metto una standard
-                imageView.setImageResource(R.drawable.diary_preview);
+            if(oPage.getByteImagePreviewPage()!=null){
+                Bitmap bmp = BitmapFactory.decodeByteArray(oPage.getByteImagePreviewPage(), 0, oPage.getByteImagePreviewPage().length,options);
+                Bitmap page = bmp.copy(Bitmap.Config.ARGB_8888, true);
+                //File checkFile = new File(sPathImage + "/" + oPpage.getPageID() + Const.CAMERA_PREVIEW_EXT);
+                if(page!=null){
+                    imageView.setImageBitmap(page);
+                }else{
+                    //Impossibile trovale la previe, ne metto una standard
+                    imageView.setImageResource(R.drawable.diary_preview);
+                }
+                //bmp.recycle();
             }
-            if(oPpage==mCurrentPage){
-                imageView.setAlpha(0.5f);
+            if(oPage==mCurrentPage){
+                imageView.setAlpha(0.1f);
             }else {
                 imageView.setOnClickListener(new View.OnClickListener() {
 
@@ -1381,17 +1416,19 @@ public class WriteActivity extends AppCompatActivity
 
                         //SaveDiaryTask oSaveDiary = new SaveDiaryTask(getApplicationContext());
                         //oSaveDiary.execute();
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "GoTo Page:" + oPage.getPageID());
                         oSurface.freeBitmap();
-                        oSurface.destroyDrawingCache();
-                        Log.v(this.getClass().getCanonicalName(), "GoTo Page:" + oPpage.getPageID());
-                        mCurrentPage = oPpage;
-                        getIntent().putExtra("CurrentPage", oPpage.getPageID());
+                        //oSurface.destroyDrawingCache();
+
+                        mCurrentPage = oPage;
+                        getIntent().putExtra("CurrentPage", oPage.getPageID());
                         PagePictureWorkerTask oTaskAsync = new PagePictureWorkerTask();
                         oTaskAsync.execute();
                     }
                 });
             }
             mPagesPreview.add(imageView);
+
         }
         Handler mHandler = new Handler(Looper.getMainLooper());
         mHandler.post(new Runnable() {
@@ -1426,7 +1463,8 @@ public class WriteActivity extends AppCompatActivity
      * */
     class LoadDiaryTask extends AsyncTask<Object, Void, Boolean> {
         private Context mContext;
-        private ProgressDialog oWaitForPage=null;
+        //private ProgressDialog oWaitForPage=null;
+        ProgressBar progressBar = new ProgressBar(WriteActivity.this, null, android.R.attr.progressBarStyleSmall);
         public LoadDiaryTask(Context applicationContext) {
 
             mContext = applicationContext;
@@ -1436,25 +1474,30 @@ public class WriteActivity extends AppCompatActivity
 
         @Override
         protected Boolean doInBackground(Object... params) {
-            if(oWaitForPage!=null){
+          /*  if(oWaitForPage!=null){
                 oWaitForPage.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         oWaitForPage.dismiss();
-                        Log.v(this.getClass().getCanonicalName(),"Cancel Load");
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Cancel Load");
                     }
                 });
-            }
+            }*/
+
             Repository mRepository=null;
             mDiary.setDiaryID(mDiary.getDiaryID());
             mRepository = new Repository(mContext);
             mDiary=mRepository.reloadDiary(mDiary);
-            if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+
+
+            //if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+            /*if(mContext.getFilesDir().exists() && mContext.getFilesDir().canWrite()){
                 sPathImage=Const.EXTDIR+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
             }else{
                 sPathImage=Const.INTERNALDIR+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
-            }
+            }*/
+            //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"PAth di salvataggio: "+sPathImage);
             /**Goto Last Page*/
             Hashtable<Long, Page> mPages = (Hashtable<Long, Page>) mDiary.getDiaryPages();
             Map<Long, Page> sortedPages = new TreeMap<Long, Page>(mPages);
@@ -1478,6 +1521,12 @@ public class WriteActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
+            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            progressBar.setLayoutParams(new LinearLayout.LayoutParams(300, 10) );
+            progressBar.setScaleX(0.1f);
+            progressBar.setScaleY(0.1f);
+            mMainLayout.addView(progressBar);
 //			oWaitForPage = ProgressDialog.show(NewWritePageActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
             super.onPreExecute();
         }
@@ -1486,6 +1535,7 @@ public class WriteActivity extends AppCompatActivity
         protected void onPostExecute(Boolean result) {
             loadDiary(false);
 //			oWaitForPage.dismiss();
+            mMainLayout.removeView(progressBar);
             super.onPostExecute(result);
         }
         /**
@@ -1505,11 +1555,11 @@ public class WriteActivity extends AppCompatActivity
                 imageView.setLayoutParams(vp);
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setPadding(8, 4, 8, 4);
-                //Log.v(this.getClass().getCanonicalName(),"Load Preview Page: "+oPpage.getPageID());
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Load Preview Page: "+oPpage.getPageID());
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize=Const.SAMPLESIZEDIARY;
-                //Log.v(this.getClass().getCanonicalName(),"load page preview: "+sPathImage+"/"+oPpage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"load page preview: "+sPathImage+"/"+oPpage.getPageID()+Const.CAMERA_PREVIEW_EXT);
                 imageView.setImageBitmap(BitmapFactory.decodeFile(sPathImage+"/"+oPpage.getPageID()+Const.CAMERA_PREVIEW_EXT, options));
                 imageView.setOnClickListener(new OnClickListener() {
 
@@ -1522,7 +1572,7 @@ public class WriteActivity extends AppCompatActivity
                         mMainLayout.closeDrawers();
                         oSurface.freeBitmap();
                         oSurface.destroyDrawingCache();
-                        Log.v(this.getClass().getCanonicalName(),"GoTo Page:"+oPpage.getPageID());
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"GoTo Page:"+oPpage.getPageID());
                         mCurrentPage= oPpage;
                         getIntent().putExtra("CurrentPage", oPpage.getPageID());
                         PagePictureWorkerTask oTaskAsync = new PagePictureWorkerTask();
@@ -1541,9 +1591,11 @@ public class WriteActivity extends AppCompatActivity
      * */
     class SaveDiaryTask extends AsyncTask<Void, Void, Boolean>{
         private Context mContext;
-        private ProgressDialog oWaitForSave=null;
-        private File mFile=null;
-        private FileOutputStream out = null;
+        //private ProgressDialog oWaitForSave=null;
+        ProgressBar progressBar = new ProgressBar(WriteActivity.this, null, android.R.attr.progressBarStyleSmall);
+        //private File mFile=null;
+        //private FileOutputStream out = null;
+
         private boolean mBackToHome=false;
         //private Bitmap mBitmap;
         public SaveDiaryTask(Context applicationContext, boolean backToHome) {
@@ -1553,22 +1605,24 @@ public class WriteActivity extends AppCompatActivity
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            if(oWaitForSave!=null){
+            /*if(oWaitForSave!=null){
                 oWaitForSave.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         oWaitForSave.dismiss();
-                        Log.v(this.getClass().getCanonicalName(),"Cancel Save");
+                        if(Const.DEVELOPER_MODE) if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Cancel Save");
                     }
                 });
-            }
-            if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+            }*/
+            if(Const.DEVELOPER_MODE) if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),mContext.getFilesDir().getPath());
+            //if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+            /*if(mContext.getFilesDir().exists() && mContext.getFilesDir().canWrite()){
                 //Memorizzo il path per le immagini
                 sPathImage=Const.EXTDIR+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
             }else{
                 sPathImage=Const.INTERNALDIR+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
-            }
+            }*/
 
 
             saveHandWrite();
@@ -1577,11 +1631,12 @@ public class WriteActivity extends AppCompatActivity
 
             loadImagePreview();
 
-            if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+            //if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+            /*if(mContext.getFilesDir().exists() && mContext.getFilesDir().canWrite()){
                 sPathImage=Const.EXTDIR+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
             }else{
                 sPathImage=Const.INTERNALDIR+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
-            }
+            }*/
 
             return DiaryRepositoryHelper.dumpDiary(mContext, mDiary);
         }
@@ -1593,11 +1648,11 @@ public class WriteActivity extends AppCompatActivity
 
             oGridPreview.setAdapter(new PreviewPagesAdapter(mPagesPreview));
 
-            try{
+           /* try{
                 if(oWaitForSave!=null) oWaitForSave.dismiss();
             }catch (IllegalArgumentException e){
-                Log.e(this.getClass().getCanonicalName(),"Error Dismiss wait");
-            }
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error Dismiss wait");
+            }*/
 
             super.onPostExecute(result);
             if(mBackToHome) {
@@ -1606,71 +1661,95 @@ public class WriteActivity extends AppCompatActivity
                     oSurface.stopDrawingThread();
                 }
                 backToHome();
-            }
+            }else{
+                oSurface.invalidate();
 
+                oSurface.init(mDiary,mCurrentPage);
+            }
+            mMainLayout.removeView(progressBar);
         }
         @Override
         protected void onPreExecute() {
             try {
-                oWaitForSave = ProgressDialog.show(mContext, getString(R.string.app_name), getString(R.string.wait), true, true, null);
+
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
+                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                progressBar.setLayoutParams(new LinearLayout.LayoutParams(300, 10) );
+                progressBar.setScaleX(0.1f);
+                progressBar.setScaleY(0.1f);
+                mMainLayout.addView(progressBar);
+
+                //oWaitForSave = ProgressDialog.show(mContext, getString(R.string.app_name), getString(R.string.wait), true, true, null);
                 super.onPreExecute();
             } catch (Exception e){
-                Log.e(this.getClass().getCanonicalName(),"error displaing dialog");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"error displaing dialog");
             }
 
         }
         private void saveHandWrite(){
-
-            File dir = new File(sPathImage);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            /*File dir = new File(sPathImage);
 
             if(!dir.exists()) {
                 dir.mkdirs();
-            }
+            }*/
             //Task async per salvare l'immagine.
             Bitmap oBmp = oSurface.getHandWritePath();
             try {
                 if(oBmp!=null){
-                    mFile = new File(sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
-                    out = new FileOutputStream(mFile);
-
-                    oBmp.compress(Bitmap.CompressFormat.PNG, 90, out);
-                    out.close();
-                    out=null;
-                    Log.v(this.getClass().getCanonicalName(),"saving hand write image: "+sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+                    //mFile = new File(sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+                    //out = new FileOutputStream(mFile);
+                    oBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+                    mCurrentPage.setByteImageHW(byteArray);
+                    DiaryRepositoryHelper.dumpHandWritePage(mContext,mCurrentPage,byteArray);
+                    //savehandwrite!!!!
+                    //oBmp.compress(Bitmap.CompressFormat.PNG, 90, out);
+                    //out.close();
+                    //oBmp.recycle();
+                    //out=null;
+                    //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"saving hand write image: "+sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
                 }else{
-                    Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
                 }
-            } catch (IOException e) {
-                Log.e(this.getClass().getCanonicalName(),"Error saving image");
+            } catch (Exception e) {
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error saving image");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Path di salvataggio: "+mContext.getFilesDir().getPath()+" "+sPathImage);
             }
         }
         /**
          * Salvo la pagepreview
          * */
         private void savePagePreview(){
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
             try {
-                File dir = new File(sPathImage);
+              /*  File dir = new File(sPathImage);
 
                 if(!dir.exists()) {
                     dir.mkdirs();
-                }
+                }*/
                 //Imposto il layer software per prendere la preview della pagina
                 //oSurface.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
                 //oSurface.setDrawingCacheEnabled(true);
-                //if(mCurrentPage!=null) mBitmap=oSurface.getBitmap();
+                if(mCurrentPage!=null) mBitmap=oSurface.getBitmap();
                 if(mBitmap!=null){
-                    mFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
-                    out = new FileOutputStream(mFile);
-                    mBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-                    out.close();
-                    out=null;
-                    Log.v(this.getClass().getCanonicalName(),"saving Page Preview image: "+sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+                    //mFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+                    //out = new FileOutputStream(mFile);
+                    mBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+                    mCurrentPage.setByteImagePreviewPage(byteArray);
+                    DiaryRepositoryHelper.dumpPagePreviewPage(mContext,mCurrentPage,byteArray);
+
+                    //mBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                    //out.close();
+                    //out=null;
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"saving Page Preview image: "+sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
                 }else{
-                    Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
                 }
                 //oSurface.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-            } catch (IOException e) {
-                Log.e(this.getClass().getCanonicalName(),"Error saving image");
+            } catch (Exception e) {
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error saving image");
             }
         }
         /**
@@ -1691,11 +1770,11 @@ public class WriteActivity extends AppCompatActivity
                 imageView.setLayoutParams(vp);
                 imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 imageView.setPadding(8, 4, 8, 4);
-                //Log.v(this.getClass().getCanonicalName(),"Load Preview Page: "+oPpage.getPageID());
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Load Preview Page: "+oPpage.getPageID());
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize=Const.SAMPLESIZEDIARY;
-                //Log.v(this.getClass().getCanonicalName(),"load page preview: "+sPathImage+"/"+oPpage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"load page preview: "+sPathImage+"/"+oPpage.getPageID()+Const.CAMERA_PREVIEW_EXT);
                 imageView.setImageBitmap(BitmapFactory.decodeFile(sPathImage+"/"+oPpage.getPageID()+Const.CAMERA_PREVIEW_EXT, options));
                 imageView.setOnClickListener(new OnClickListener() {
 
@@ -1706,7 +1785,7 @@ public class WriteActivity extends AppCompatActivity
                         //oSaveDiary.execute();
                         oSurface.freeBitmap();
                         oSurface.destroyDrawingCache();
-                        Log.v(this.getClass().getCanonicalName(),"GoTo Page:"+oPpage.getPageID());
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"GoTo Page:"+oPpage.getPageID());
                         mCurrentPage= oPpage;
                         getIntent().putExtra("CurrentPage", oPpage.getPageID());
                         PagePictureWorkerTask oTaskAsync = new PagePictureWorkerTask();
@@ -1724,9 +1803,12 @@ public class WriteActivity extends AppCompatActivity
      * */
     class SaveEraserTask extends AsyncTask<Void, Void, Boolean>{
         private Context mContext;
-        private ProgressDialog oWaitForSave=null;
-        private File mFile=null;
-        private FileOutputStream out = null;
+        //private ProgressDialog oWaitForSave=null;
+        ProgressBar progressBar = new ProgressBar(WriteActivity.this, null, android.R.attr.progressBarStyleSmall);
+
+        //private File mFile=null;
+        //private FileOutputStream out = null;
+
         private boolean mBackToHome=false;
         //private Bitmap mBitmap;
         public SaveEraserTask(Context applicationContext, boolean backToHome) {
@@ -1736,22 +1818,23 @@ public class WriteActivity extends AppCompatActivity
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            if(oWaitForSave!=null){
+            /*if(oWaitForSave!=null){
                 oWaitForSave.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         oWaitForSave.dismiss();
-                        Log.v(this.getClass().getCanonicalName(),"Cancel Save");
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Cancel Save");
                     }
                 });
-            }
-            if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+            }*/
+            /*//if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+            if(mContext.getFilesDir().exists() && mContext.getFilesDir().canWrite()){
                 //Memorizzo il path per le immagini
-                sPathImage=Const.EXTDIR+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
+                sPathImage=mContext.getFilesDir().getPath()+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
             }else{
                 sPathImage=Const.INTERNALDIR+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
-            }
+            }*/
             saveHandWrite();
 
             return true;
@@ -1759,52 +1842,63 @@ public class WriteActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(Boolean result) {
-            if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
-                sPathImage=Const.EXTDIR+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
+            //if(Environment.getExternalStorageDirectory().exists() && Environment.getExternalStorageDirectory().canWrite()){
+           /* if(mContext.getFilesDir().exists() && mContext.getFilesDir().canWrite()){
+                sPathImage=mContext.getFilesDir().getPath()+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
             }else{
                 sPathImage=Const.INTERNALDIR+getPackageName()+"/"+mDiary.getDiaryID() + "/Pictures";
-            }
+            }*/
             oGridPreview.setAdapter(new PreviewPagesAdapter(mPagesPreview));
 
-            if(oWaitForSave!=null) oWaitForSave.dismiss();
+            //if(oWaitForSave!=null) oWaitForSave.dismiss();
             super.onPostExecute(result);
 
             if(oSurface.isDeleted()){
                 oSurface.freeBitmap();
-                oSurface.destroyDrawingCache();
+                //oSurface.destroyDrawingCache();
                 loadDiary(true);
                 oSurface.setDeleteMode(true);
             }
         }
         @Override
         protected void onPreExecute() {
-            oWaitForSave = ProgressDialog.show(WriteActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
+            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            progressBar.setLayoutParams(new LinearLayout.LayoutParams(300, 10) );
+            progressBar.setScaleX(0.1f);
+            progressBar.setScaleY(0.1f);
+            mMainLayout.addView(progressBar);
+           // oWaitForSave = ProgressDialog.show(WriteActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
 
             super.onPreExecute();
         }
         private void saveHandWrite(){
-
-            File dir = new File(sPathImage);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            /*File dir = new File(sPathImage);
 
             if(!dir.exists()) {
                 dir.mkdirs();
-            }
+            }*/
             //Task async per salvare l'immagine.
             Bitmap oBmp = oSurface.getHandWritePath();
             try {
                 if(oBmp!=null){
-                    mFile = new File(sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
-                    out = new FileOutputStream(mFile);
+                    //mFile = new File(sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+                    //out = new FileOutputStream(mFile);
+                    oBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+                    mCurrentPage.setByteImageHW(byteArray);
+                    DiaryRepositoryHelper.dumpHandWritePage(mContext,mCurrentPage,byteArray);
 
-                    oBmp.compress(Bitmap.CompressFormat.PNG, 90, out);
-                    out.close();
-                    out=null;
-                    Log.v(this.getClass().getCanonicalName(),"saving hand write image: "+sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+                    //oBmp.compress(Bitmap.CompressFormat.PNG, 90, out);
+                    //out.close();
+                    //out=null;
+                    //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"saving hand write image: "+sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
                 }else{
-                    Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
                 }
-            } catch (IOException e) {
-                Log.e(this.getClass().getCanonicalName(),"Error saving image");
+            } catch (Exception e) {
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error saving image");
             }
         }
     }
@@ -1815,10 +1909,11 @@ public class WriteActivity extends AppCompatActivity
     class SavePageTask extends AsyncTask<Void, Void, Boolean> {
 
         private Context mContext;
-        private ProgressDialog oWaitForSave=null;
+        //private ProgressDialog oWaitForSave=null;
+        ProgressBar progressBar = new ProgressBar(WriteActivity.this, null, android.R.attr.progressBarStyleSmall);
         //private Bitmap mBitmap;
-        private File mFile=null;
-        private FileOutputStream out = null;
+        //private File mFile=null;
+        //private FileOutputStream out = null;
         private int mPageOrientation=0;
         public SavePageTask(Context applicationContext) {
             mContext = applicationContext;
@@ -1831,16 +1926,16 @@ public class WriteActivity extends AppCompatActivity
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            if(oWaitForSave!=null){
+          /*  if(oWaitForSave!=null){
                 oWaitForSave.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         oWaitForSave.dismiss();
-                        Log.v(this.getClass().getCanonicalName(),"Cancel Save");
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Cancel Save");
                     }
                 });
-            }
+            }*/
             saveHandWrite();
 
             savePagePreview();
@@ -1851,13 +1946,13 @@ public class WriteActivity extends AppCompatActivity
             mCurrentPage.setDiaryImage(new Hashtable<Long, DiaryPicture>());
             mDiary=DiaryHelper.addPageToDiary(mDiary, mCurrentPage);
             savePagePreview();
-            if(oWaitForSave!=null && oWaitForSave.isShowing()){
+           /* if(oWaitForSave!=null && oWaitForSave.isShowing()){
                 try{
                     oWaitForSave.dismiss();
                 }catch (IllegalArgumentException e){
-                    Log.e(this.getClass().getCanonicalName(),"no dismiss error");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"no dismiss error");
                 }
-            }
+            }*/
             return DiaryRepositoryHelper.dumpPage(mContext, mCurrentPage);
         }
 
@@ -1866,34 +1961,16 @@ public class WriteActivity extends AppCompatActivity
             //mCurrentPage=DiaryHelper.factoryNewPageBuilder();
             //mCurrentPage.setPageOrientation(mPageOrientation);
             //mDiary=DiaryHelper.addPageToDiary(mDiary, mCurrentPage);//loadDiaryNewPage(true);
-            File tmpImgFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
-            if(!tmpImgFile.exists()) return;
+            //File tmpImgFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+            //if(!tmpImgFile.exists()) return;
             ImageView oImage= new ImageView(WriteActivity.this);
-            oImage.setImageBitmap(BitmapFactoryHelper.decodeSampledBitmapFromFile(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT));
-            oOldPage= oImage;
 
-            //oSurface.freeBitmap();
-            //oSurface.addThreadForRefresh();
+            //oImage.setImageBitmap(BitmapFactoryHelper.decodeSampledBitmapFromFile(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT));
 
-
-            if(mPageOrientation!=getRequestedOrientation()){
-                if(oWaitForSave!=null && !oWaitForSave.isShowing()){
-                    try{
-                        oWaitForSave.dismiss();
-                    }catch (IllegalArgumentException e){
-                        Log.e(this.getClass().getCanonicalName(),"no dismiss error");
-                    }
-                }
-            }else{
-                if(oWaitForSave!=null && !oWaitForSave.isShowing()){
-                    try{
-                        oWaitForSave.dismiss();
-                    }catch (IllegalArgumentException e){
-                        Log.e(this.getClass().getCanonicalName(),"no dismiss error");
-                    }
-                }
+            if(mCurrentPage.getByteImagePreviewPage()!=null) {
+                oImage.setImageBitmap(BitmapFactory.decodeByteArray(mCurrentPage.getByteImagePreviewPage() , 0, mCurrentPage.getByteImagePreviewPage().length));
+                oOldPage= oImage;
             }
-
             getIntent().putExtra("template",mDiary.getDiaryTemplate());
             getIntent().putExtra("DiaryID",mCurrentPage.getDiaryID());
             getIntent().putExtra("CurrentPage",mCurrentPage.getPageID());
@@ -1901,8 +1978,10 @@ public class WriteActivity extends AppCompatActivity
             loadDiary(false);
 
             //TEST ANIMATION
-            FlipAnimation flipAnimation = new FlipAnimation(oOldPage,oSurface);
-            flipAnimation.setAnimationListener(new Animation.AnimationListener() {
+            Animation a = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.out_to_right);
+            //FlipAnimation flipAnimation = new FlipAnimation(oOldPage,oSurface);
+            //flipAnimation
+            a.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
 
@@ -1911,10 +1990,11 @@ public class WriteActivity extends AppCompatActivity
                 @Override
                 public void onAnimationEnd(Animation animation) {
 
-                    mMainLayout.postInvalidate();
-                    mMainLayout.invalidate();
-                    oSurface.invalidate();
-                    oOldPage.invalidate();
+                    if(mMainLayout!=null) mMainLayout.postInvalidate();
+                    if(mMainLayout!=null) mMainLayout.invalidate();
+                    if(oSurface!=null) oSurface.invalidate();
+                    if(oOldPage!=null) oOldPage.invalidate();
+                    mMainLayout.removeView(progressBar);
                     //oSurface.init(mDiary,mCurrentPage);
                 }
 
@@ -1925,9 +2005,10 @@ public class WriteActivity extends AppCompatActivity
             });
             if (oOldPage!=null && oOldPage.getVisibility() == View.GONE)
             {
-                flipAnimation.reverse();
+                //flipAnimation.reverse();
             }
-            mMainLayout.startAnimation(flipAnimation);
+            //mMainLayout.startAnimation(flipAnimation);
+            mMainLayout.startAnimation(a);
 
             super.onPostExecute(result);
         }
@@ -1935,7 +2016,14 @@ public class WriteActivity extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             if(mPageOrientation!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){
-                oWaitForSave = ProgressDialog.show(WriteActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
+
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
+                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                progressBar.setLayoutParams(new LinearLayout.LayoutParams(300, 10) );
+                progressBar.setScaleX(0.1f);
+                progressBar.setScaleY(0.1f);
+                mMainLayout.addView(progressBar);
+                //oWaitForSave = ProgressDialog.show(WriteActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
             }
             super.onPreExecute();
         }
@@ -1944,42 +2032,53 @@ public class WriteActivity extends AppCompatActivity
          * Salvo la pagepreview
          * */
         private void savePagePreview(){
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
             try {
-                //if(mCurrentPage!=null) mBitmap=oSurface.getBitmap();
+                if(mCurrentPage!=null) mBitmap=oSurface.getBitmap();
                 if(mBitmap!=null){
-                    mFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
-                    out = new FileOutputStream(mFile);
-                    mBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-                    out.close();
-                    out=null;
-                    Log.v(this.getClass().getCanonicalName(),"Page Preview saving image: "+sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+                    //mFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+                    //out = new FileOutputStream(mFile);
+                    //mBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                    //out.close();
+                    mBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+                    mCurrentPage.setByteImagePreviewPage(byteArray);
+                    DiaryRepositoryHelper.dumpPagePreviewPage(mContext,mCurrentPage,byteArray);
+                    //mCurrentPage.setByteImagePreviewPage(byteArray);
+                    //out=null;
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Page Preview saving image: "+sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
                 }else{
-                    Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
                 }
-            } catch (IOException e) {
-                Log.e(this.getClass().getCanonicalName(),"Error saving image");
+            } catch (Exception e) {
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error saving image");
             }
         }
         /**
          * Salvo le vecchie path
          * */
         private void saveHandWrite(){
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
             //Task async per salvare l'immagine.
             Bitmap oBmp = oSurface.getHandWritePath();
             try {
                 if(oBmp!=null){
-                    mFile = new File(sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
-                    out = new FileOutputStream(mFile);
-
-                    oBmp.compress(Bitmap.CompressFormat.PNG, 90, out);
-                    out.close();
-                    out=null;
-                    Log.v(this.getClass().getCanonicalName(),"Page Preview saving image: "+sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+                    //mFile = new File(sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
+                    //out = new FileOutputStream(mFile);
+                    oBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+                    mCurrentPage.setByteImageHW(byteArray);
+                    DiaryRepositoryHelper.dumpHandWritePage(mContext,mCurrentPage,byteArray);
+                    //mCurrentPage.setByteImageHW(byteArray);
+                    //oBmp.compress(Bitmap.CompressFormat.PNG, 90, out);
+                    //out.close();
+                    //out=null;
+                    //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Page Preview saving image: "+sPathImage+"/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT);
                 }else{
-                    Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
                 }
-            } catch (IOException e) {
-                Log.e(this.getClass().getCanonicalName(),"Error saving image");
+            } catch (Exception e) {
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error saving image");
             }
         }
     }
@@ -2002,15 +2101,15 @@ public class WriteActivity extends AppCompatActivity
                     && mCurrentPage.getDiaryImage().size()>0){
 
                 //Cancello le immagini della pagina
-                Hashtable<Long, DiaryPicture> mImages = (Hashtable<Long, DiaryPicture>) mCurrentPage.getDiaryImage();
+                /*Hashtable<Long, DiaryPicture> mImages = (Hashtable<Long, DiaryPicture>) mCurrentPage.getDiaryImage();
                 TreeMap<Long, DiaryPicture> sortedImages = new TreeMap<Long, DiaryPicture>(mImages);
                 for(DiaryPicture oPicture : sortedImages.values()){
                     File removeFile = new File(oPicture.getDiaryImageURI());
                     if(!removeFile.delete()){
-                        Log.e(DiaryRepositoryHelper.class.getClass().getCanonicalName(),"Error removing image for page: "+removeFile.getAbsoluteFile());
+                        if(Const.DEVELOPER_MODE) Log.e(DiaryRepositoryHelper.class.getClass().getCanonicalName(),"Error removing image for page: "+removeFile.getAbsoluteFile());
                     }
                     removeFile=null;
-                }
+                }*/
             }
             boolean bDelete = mRepository.deletePage(mCurrentPage);
             new Thread(new Runnable() {
@@ -2056,11 +2155,11 @@ public class WriteActivity extends AppCompatActivity
                 imageView.setLayoutParams(vp);
                 imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 imageView.setPadding(8, 4, 8, 4);
-                //Log.v(this.getClass().getCanonicalName(),"Load Preview Page: "+oPpage.getPageID());
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Load Preview Page: "+oPpage.getPageID());
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize=Const.SAMPLESIZEDIARY;
-                //Log.v(this.getClass().getCanonicalName(),"load page preview: "+sPathImage+"/"+oPpage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+                //if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"load page preview: "+sPathImage+"/"+oPpage.getPageID()+Const.CAMERA_PREVIEW_EXT);
                 imageView.setImageBitmap(BitmapFactory.decodeFile(sPathImage+"/"+oPpage.getPageID()+Const.CAMERA_PREVIEW_EXT, options));
                 imageView.setOnClickListener(new OnClickListener() {
 
@@ -2071,7 +2170,7 @@ public class WriteActivity extends AppCompatActivity
                         //oSaveDiary.execute();
                         oSurface.freeBitmap();
                         oSurface.destroyDrawingCache();
-                        Log.v(this.getClass().getCanonicalName(),"GoTo Page:"+oPpage.getPageID());
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"GoTo Page:"+oPpage.getPageID());
                         mCurrentPage= oPpage;
                         getIntent().putExtra("CurrentPage", oPpage.getPageID());
                         PagePictureWorkerTask oTaskAsync = new PagePictureWorkerTask();
@@ -2109,8 +2208,12 @@ public class WriteActivity extends AppCompatActivity
 
     }
 
+    /*
+    * @deprecated
+    */
     class BitmapWorkerTask extends AsyncTask<Void, String, Boolean> {
-        private ProgressDialog oWaitForSave=null;
+        //private ProgressDialog oWaitForSave=null;
+        ProgressBar progressBar = new ProgressBar(WriteActivity.this, null, android.R.attr.progressBarStyleSmall);
         private File mFile=null;
         private FileOutputStream out = null;
         private Bitmap.CompressFormat mCompress=null;
@@ -2124,25 +2227,25 @@ public class WriteActivity extends AppCompatActivity
 
         @Override
         protected Boolean doInBackground(Void... arg0) {
-            if(oWaitForSave!=null){
+           /* if(oWaitForSave!=null){
                 oWaitForSave.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         oWaitForSave.dismiss();
-                        Log.v(this.getClass().getCanonicalName(),"Cancel Save");
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Cancel Save");
                     }
                 });
-            }
-            File tmpImgFile = new File(sPathImage + "/" + sImageName);
-            if(!tmpImgFile.exists()) return false;
+            }*/
+            //File tmpImgFile = new File(sPathImage + "/" + sImageName);
+            //if(!tmpImgFile.exists()) return false;
 
             /*bitmap della fotocamera in dimensione originale*/
             BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize=Const.SAMPLESIZEDIARY;
-            oOriginalSizeBmp = BitmapFactory.decodeFile(sPathImage + "/" + sImageName,options);
+            options.inSampleSize=calculateInSampleSize();
+            //oOriginalSizeBmp = BitmapFactory.decodeFile(sPathImage + "/" + sImageName,options);
             //Calcolo la rotazione dell'immagine
-            mRotationAngle=getCameraPhotoOrientation(sPathImage + "/" + sImageName);
+            //mRotationAngle=getCameraPhotoOrientation(sPathImage + "/" + sImageName);
 
             if(oOriginalSizeBmp==null) return false;
             if(oOriginalSizeBmp.getWidth()> oOriginalSizeBmp.getHeight()){
@@ -2298,24 +2401,24 @@ public class WriteActivity extends AppCompatActivity
             mRotateCanvas.drawBitmap(oScaledSizeBmp, 0,0,new Paint());
 
 
-            try {
+            /*try {
                 if(oScaledSizeBmp!=null){
                     mFile = new File(sPathImage+"/"+sImageName);
                     out = new FileOutputStream(mFile);
                     if(mCompress==null){
                         mCompress=Bitmap.CompressFormat.JPEG;
-                        Log.v(this.getClass().getCanonicalName(),"Compress JPEG");
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Compress JPEG");
                     }
                     oScaledSizeBmp.compress(mCompress, 90, out);
                     out.close();
                     out=null;
-                    Log.v(this.getClass().getCanonicalName(),"Saving Scalated Image: "+sPathImage+"/"+sImageName);
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Saving Scalated Image: "+sPathImage+"/"+sImageName);
                 }else{
-                    Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
                 }
             } catch (IOException e) {
-                Log.e(this.getClass().getCanonicalName(),"Error saving image");
-            }
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error saving image");
+            }*/
             //Salvo prima l'immagine
             loadPictureAfterResize();
             return DiaryRepositoryHelper.dumpDiary(getApplicationContext(), mDiary);
@@ -2348,7 +2451,13 @@ public class WriteActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            oWaitForSave = ProgressDialog.show(WriteActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
+            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            progressBar.setLayoutParams(new LinearLayout.LayoutParams(300, 10) );
+            progressBar.setScaleX(0.1f);
+            progressBar.setScaleY(0.1f);
+            mMainLayout.addView(progressBar);
+            //oWaitForSave = ProgressDialog.show(WriteActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
             super.onPreExecute();
         }
 
@@ -2360,13 +2469,13 @@ public class WriteActivity extends AppCompatActivity
 
                 loadDiary(false);
             }
-            if(oWaitForSave!=null && oWaitForSave.isShowing()){
+           /* if(oWaitForSave!=null && oWaitForSave.isShowing()){
                 try{
                     oWaitForSave.dismiss();
                 }catch (IllegalArgumentException e){
-                    Log.e(this.getClass().getCanonicalName(),"no dismiss error");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"no dismiss error");
                 }
-            }
+            }*/
             super.onPostExecute(result);
         }
     }
@@ -2374,9 +2483,10 @@ public class WriteActivity extends AppCompatActivity
      * elaborazione delle immagini dalla galleria
      * */
     class GalleryWorkerTask extends AsyncTask<Void, String, Boolean> {
-        private ProgressDialog oWaitForSave=null;
-        private File mFile=null;
-        private FileOutputStream out = null;
+        //private ProgressDialog oWaitForSave=null;
+        ProgressBar progressBar = new ProgressBar(WriteActivity.this, null, android.R.attr.progressBarStyleSmall);
+        //private File mFile=null;
+        //private FileOutputStream out = null;
         private Bitmap.CompressFormat mCompress=null;
         private Intent mData;
         private int mRotationAngle=0;
@@ -2390,19 +2500,19 @@ public class WriteActivity extends AppCompatActivity
         protected Boolean doInBackground(Void... arg0) {
 
             try {
-                if(oWaitForSave!=null){
+                /*if(oWaitForSave!=null){
                     oWaitForSave.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
                         @Override
                         public void onCancel(DialogInterface dialog) {
                             oWaitForSave.dismiss();
-                            Log.v(this.getClass().getCanonicalName(),"Cancel Save");
+                            if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Cancel Save");
                         }
                     });
-                }
+                }*/
                 Date date = new Date();
                 DateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-                sImageName=df.format(date) + Const.CAMERA_PREVIEW_EXT;
+                //sImageName=df.format(date) + Const.CAMERA_PREVIEW_EXT;
                 if(mData==null) return false;
                 Uri imageFromGallery = mData.getData();
                 InputStream imageStream = getContentResolver().openInputStream(imageFromGallery);
@@ -2415,13 +2525,13 @@ public class WriteActivity extends AppCompatActivity
                 Bitmap oOriginalSizeBmp = BitmapFactory.decodeStream(imageStream,null,options);
                 imageStream.close();
 
-                Cursor cursor = getContentResolver().query(imageFromGallery, null, null, null, null);
-                cursor.moveToFirst();
+                //Cursor cursor = getContentResolver().query(imageFromGallery, null, null, null, null);
+                //cursor.moveToFirst();
                 //int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
 
                 //Calcolo la rotazione dell'immagine
                 //mRotationAngle=getCameraPhotoOrientation(cursor.getString(idx));
-                cursor.close();
+                //cursor.close();
 
                 if(oOriginalSizeBmp!=null && (oOriginalSizeBmp.getWidth()> oOriginalSizeBmp.getHeight())){
                     oScaledSizeBmp = Bitmap.createScaledBitmap(oOriginalSizeBmp, Const.IMGWIDTH, Const.IMGHEIGHT, true);
@@ -2575,24 +2685,25 @@ public class WriteActivity extends AppCompatActivity
                 oScaledSizeBmp = Bitmap.createBitmap(oScaledSizeBmp,0,0,oScaledSizeBmp.getWidth(),oScaledSizeBmp.getHeight(),matrix,true);
                 mRotateCanvas.drawBitmap(oScaledSizeBmp, 0,0,new Paint());
 
-                if(oScaledSizeBmp!=null){
+               /* if(oScaledSizeBmp!=null){
                     mFile = new File(sPathImage+"/"+sImageName);
                     out = new FileOutputStream(mFile);
                     if(mCompress==null){
                         mCompress=Bitmap.CompressFormat.JPEG;
-                        Log.v(this.getClass().getCanonicalName(),"Compress JPEG");
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Compress JPEG");
                     }
                     oScaledSizeBmp.compress(mCompress, 90, out);
+                    //Salvare i byte[] in SQLite
                     out.close();
                     out=null;
-                    Log.v(this.getClass().getCanonicalName(),"Saving Scalated Image: "+sPathImage+"/"+sImageName);
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Saving Scalated Image: "+sPathImage+"/"+sImageName);
                 }else{
-                    Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
-                }
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"NULL Page Preview saving image");
+                }*/
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
-                Log.e(this.getClass().getCanonicalName(),"Error saving image");
+                if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"Error saving image");
             }
             //Salvo prima l'immagine
             loadPictureAfterResize();
@@ -2623,7 +2734,13 @@ public class WriteActivity extends AppCompatActivity
         }
         @Override
         protected void onPreExecute() {
-            oWaitForSave = ProgressDialog.show(WriteActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
+            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            progressBar.setLayoutParams(new LinearLayout.LayoutParams(300, 10) );
+            progressBar.setScaleX(0.1f);
+            progressBar.setScaleY(0.1f);
+            mMainLayout.addView(progressBar);
+            //oWaitForSave = ProgressDialog.show(WriteActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
             super.onPreExecute();
         }
         @Override
@@ -2632,13 +2749,14 @@ public class WriteActivity extends AppCompatActivity
             oSurface.freeBitmap();
 
             loadDiary(false);
-            if(oWaitForSave!=null && oWaitForSave.isShowing()){
+            mMainLayout.removeView(progressBar);
+           /* if(oWaitForSave!=null && oWaitForSave.isShowing()){
                 try{
                     oWaitForSave.dismiss();
                 }catch (IllegalArgumentException e){
-                    Log.e(this.getClass().getCanonicalName(),"no dismiss error");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"no dismiss error");
                 }
-            }
+            }*/
             super.onPostExecute(result);
         }
     }
@@ -2658,16 +2776,23 @@ public class WriteActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
-            File tmpImgFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
-            if(!tmpImgFile.exists()) return;
+            //File tmpImgFile = new File(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+            //if(!tmpImgFile.exists()) return;
 
+            Bitmap bmp = BitmapFactory.decodeByteArray(mCurrentPage.getByteImagePreviewPage(), 0, (mCurrentPage.getByteImagePreviewPage().length));
+            Bitmap mutableBitmap = bmp.copy(Bitmap.Config.ARGB_8888, true);
+
+            //TODO CAMBIO PAGINA! GLM
             ImageView oImage= new ImageView(WriteActivity.this);
-            oImage.setImageBitmap(BitmapFactoryHelper.decodeSampledBitmapFromFile(sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT));
+            oImage.setImageBitmap(mutableBitmap);
             oOldPage= oImage;
-
+            //bmp.recycle();
             //TEST ANIMATION
-            FlipAnimation flipAnimation = new FlipAnimation(oOldPage,oSurface);
-            flipAnimation.setAnimationListener(new Animation.AnimationListener() {
+            Animation a = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.out_to_right);
+
+            //FlipAnimation flipAnimation = new FlipAnimation(oOldPage,oSurface);
+            //flipAnimation
+            a.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
                     mMainLayout.closeDrawers();
@@ -2677,7 +2802,7 @@ public class WriteActivity extends AppCompatActivity
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    Log.v(this.getClass().getCanonicalName(), "Animation End");
+                    if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(), "Animation End");
                     mMainLayout.postInvalidate();
                     mMainLayout.invalidate();
                     oSurface.invalidate();
@@ -2692,11 +2817,11 @@ public class WriteActivity extends AppCompatActivity
 
             if (oOldPage!=null && oOldPage.getVisibility() == View.GONE)
             {
-                flipAnimation.reverse();
+                //flipAnimation.reverse();
             }
 
-            mMainLayout.startAnimation(flipAnimation);
-
+            //mMainLayout.startAnimation(flipAnimation);
+            mMainLayout.startAnimation(a);
         }
     }
 
@@ -2705,21 +2830,23 @@ public class WriteActivity extends AppCompatActivity
      * un task asincrono.
      * */
     class ExportPDFTask extends AsyncTask<Void, String, Boolean> {
-        private ProgressDialog oWaitForSave=null;
+        //private ProgressDialog oWaitForSave=null;
+        ProgressBar progressBar = new ProgressBar(WriteActivity.this, null, android.R.attr.progressBarStyleSmall);
         private Repository mRepository=null;
         private PdfBuilder oPdf;
         @Override
         protected Boolean doInBackground(Void... voids) {
-            if(oWaitForSave!=null){
+
+            /*if(oWaitForSave!=null){
                 oWaitForSave.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         oWaitForSave.dismiss();
-                        Log.v(this.getClass().getCanonicalName(),"Cancel Save");
+                        if(Const.DEVELOPER_MODE) Log.v(this.getClass().getCanonicalName(),"Cancel Save");
                     }
                 });
-            }
+            }*/
             mRepository = new Repository(getApplicationContext());
             mDiary=mRepository.reloadDiaryForExport(mDiary);
 
@@ -2729,20 +2856,28 @@ public class WriteActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            oWaitForSave = ProgressDialog.show(WriteActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
+
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
+            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            progressBar.setLayoutParams(new LinearLayout.LayoutParams(300, 10) );
+            progressBar.setScaleX(0.1f);
+            progressBar.setScaleY(0.1f);
+            mMainLayout.addView(progressBar);
+            //oWaitForSave = ProgressDialog.show(WriteActivity.this,getString(R.string.app_name),getString(R.string.wait),true,true,null);
             super.onPreExecute();
         }
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
-            if(oWaitForSave!=null && oWaitForSave.isShowing()){
+            mMainLayout.removeView(progressBar);
+            /*if(oWaitForSave!=null && oWaitForSave.isShowing()){
                 try{
                     oWaitForSave.dismiss();
                 }catch (IllegalArgumentException e){
-                    Log.e(this.getClass().getCanonicalName(),"no dismiss error");
+                    if(Const.DEVELOPER_MODE) Log.e(this.getClass().getCanonicalName(),"no dismiss error");
                 }
-            }
+            }*/
             if(oPdf.pdfBuilder()){
                 Intent myIntent = new Intent(Intent.ACTION_VIEW);
                 myIntent.setDataAndType(Uri.fromFile(oPdf.getPdfFile()), "application/pdf");

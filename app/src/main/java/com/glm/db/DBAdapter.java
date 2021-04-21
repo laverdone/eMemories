@@ -40,9 +40,9 @@ public class DBAdapter {
 
 		try {
 			mDbHelper.openDataBase();
-			Log.v(TAG, "Database aperto");
+			Log.v(this.getClass().getCanonicalName(), "Database aperto");
 		} catch (IllegalStateException e) {
-			Log.e(TAG, "Unable to open database");
+			Log.e(this.getClass().getCanonicalName(), "Unable to open database");
 			throw new PersistenceException(e.getMessage());
 		}
 		return this;
@@ -95,12 +95,14 @@ public class DBAdapter {
 				String creationDiary = "CREATE TABLE IF NOT EXISTS {0} " +
 						"({1} INT PRIMARY KEY," +
 						"{2} VARCHAR(100) NULL," +
-						"{3} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
-						"{4} DATETIME NOT NULL," +
-						"{5} INT NOT NULL DEFAULT 0)";
+						"{3} BLOB," +
+						"{4} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+						"{5} DATETIME NOT NULL," +
+						"{6} INT NOT NULL DEFAULT 0, " +
+						"{7} VARCHAR(80) NULL)";
 
 				db.execSQL(MessageFormat.format(creationDiary, DiaryTable.TABLE_NAME, DiaryTable.DIARYID, 
-						DiaryTable.DIARYNAME, DiaryTable.DIARYDTCREATION,DiaryTable.DIARYDTMODIFY, DiaryTable.DIARYTEMPLATE));
+						DiaryTable.DIARYNAME, DiaryTable.DIARYPREVIEW,DiaryTable.DIARYDTCREATION,DiaryTable.DIARYDTMODIFY, DiaryTable.DIARYTEMPLATE,DiaryTable.CLOUDID));
 				
 				/***
 				 * 
@@ -110,17 +112,19 @@ public class DBAdapter {
 				String creationPages = "CREATE TABLE IF NOT EXISTS {0} " +
 						"({1} INT PRIMARY KEY," +
 						"{2} INT NOT NULL," +
-						"{3} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP," +
-						"{4} INT NOT NULL DEFAULT 1," +
-						"{5} TINYINT(1) NULL DEFAULT 0," +
-						"{6} DOUBLE NULL," +
-						"{7} DOUBLE NULL," +
+						"{3} BLOB," +
+						"{4} BLOB," +
+						"{5} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP," +
+						"{6} INT NOT NULL DEFAULT 1," +
+						"{7} TINYINT(1) NULL DEFAULT 0," +
 						"{8} DOUBLE NULL," +
-						"{9} VARCHAR(100) NULL," +
-						"{10} INT NOT NULL DEFAULT 1)";
+						"{9} DOUBLE NULL," +
+						"{10} DOUBLE NULL," +
+						"{11} VARCHAR(100) NULL," +
+						"{12} INT NOT NULL DEFAULT 1)";
 
 				db.execSQL(MessageFormat.format(creationPages, PagesTable.TABLE_NAME, PagesTable.PAGEID, PagesTable.DIARYID,
-						PagesTable.PAGEDTCREATION, PagesTable.PAGENUMBER, PagesTable.PAGEBOOKMARK, PagesTable.PAGEALT,
+						PagesTable.PAGEPREVIEW, PagesTable.PAGEHANDWRITE, PagesTable.PAGEDTCREATION, PagesTable.PAGENUMBER, PagesTable.PAGEBOOKMARK, PagesTable.PAGEALT,
 						PagesTable.PAGELAT, PagesTable.PAGELONG, PagesTable.PAGELOC, PagesTable.PAGEORIENTATION));
 				
 				
@@ -152,17 +156,18 @@ public class DBAdapter {
 						"({1} INT NOT NULL," +
 						"{2} INT NOT NULL," +
 						"{3} INT NOT NULL," +
-						"{4} VARCHAR(100) NOT NULL," +
-						"{5} INT NOT NULL," +
+						"{4} BLOB," +
+						"{5} VARCHAR(100) NOT NULL," +
 						"{6} INT NOT NULL," +
-						"{7} DOUBLE NOT NULL DEFAULT 0," +
-						"{8} INT NOT NULL DEFAULT 0," +
+						"{7} INT NOT NULL," +
+						"{8} DOUBLE NOT NULL DEFAULT 0," +
 						"{9} INT NOT NULL DEFAULT 0," +
-						"{10} TINYINT(1) NULL DEFAULT 0," +
+						"{10} INT NOT NULL DEFAULT 0," +
+						"{11} TINYINT(1) NULL DEFAULT 0," +
 						"PRIMARY KEY ( {1},{2},{3}))";
 
 				db.execSQL(MessageFormat.format(creationPicture, PictureTable.TABLE_NAME, PictureTable.PICTUREID, PictureTable.DIARYID, PictureTable.PAGEID,
-						PictureTable.PICTUREURI, PictureTable.PICTUREH, PictureTable.PICTUREW, PictureTable.PICTUREROTATION,
+						PictureTable.PICTUREPREVIEW,PictureTable.PICTUREURI, PictureTable.PICTUREH, PictureTable.PICTUREW, PictureTable.PICTUREROTATION,
 						PictureTable.PICTUREX, PictureTable.PICTUREY,PictureTable.PICTUREHAND));
 				
 				/***
@@ -292,8 +297,9 @@ public class DBAdapter {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-                File fdb = new File(Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/db/"+DATABASE_NAME);
-                //Copio i vecci dati
+
+                File fdb = new File(mContext.getFilesDir().getPath() + "/"+mContext.getPackageName()+"/db/"+DATABASE_NAME);
+                //Copio i vecchi dati
                 if(fdb.exists()){
                     db.close();
                     //Copio e rimuovo il vecchio DB
@@ -303,84 +309,105 @@ public class DBAdapter {
                         //onUpgrade(db,DB_VERSION-1,DB_VERSION);
                     }
                 }else{
-                    /***
-                     *
-                     * Table Diary
-                     *
-                     */
-                    String creationDiary = "CREATE TABLE IF NOT EXISTS {0} " +
-                            "({1} INT PRIMARY KEY," +
-                            "{2} VARCHAR(100) NULL," +
-                            "{3} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
-                            "{4} DATETIME NOT NULL," +
-                            "{5} INT NOT NULL DEFAULT 0," +
-                            "{6} VARCHAR(80))";
+					/***
+					 *
+					 * Table Diary
+					 *
+					 */
+					String creationDiary = "CREATE TABLE IF NOT EXISTS {0} " +
+							"({1} INT PRIMARY KEY," +
+							"{2} VARCHAR(100) NULL," +
+							"{3} BLOB," +
+							"{4} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+							"{5} DATETIME NOT NULL," +
+							"{6} INT NOT NULL DEFAULT 0, " +
+							"{7} VARCHAR(80) NULL)";
 
-                    db.execSQL(MessageFormat.format(creationDiary, DiaryTable.TABLE_NAME, DiaryTable.DIARYID,
-                            DiaryTable.DIARYNAME, DiaryTable.DIARYDTCREATION,DiaryTable.DIARYDTMODIFY, DiaryTable.DIARYTEMPLATE, DiaryTable.CLOUDID));
+					db.execSQL(MessageFormat.format(creationDiary, DiaryTable.TABLE_NAME, DiaryTable.DIARYID,
+							DiaryTable.DIARYNAME, DiaryTable.DIARYPREVIEW,DiaryTable.DIARYDTCREATION,DiaryTable.DIARYDTMODIFY, DiaryTable.DIARYTEMPLATE,DiaryTable.CLOUDID));
 
-                    /***
-                     *
-                     * Table Pages
-                     *
-                     */
-                    String creationPages = "CREATE TABLE IF NOT EXISTS {0} " +
-                            "({1} INT PRIMARY KEY," +
-                            "{2} INT NOT NULL," +
-                            "{3} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP," +
-                            "{4} INT NOT NULL DEFAULT 1," +
-                            "{5} TINYINT(1) NULL DEFAULT 0," +
-                            "{6} DOUBLE NULL," +
-                            "{7} DOUBLE NULL," +
-                            "{8} DOUBLE NULL," +
-                            "{9} VARCHAR(100) NULL," +
-                            "{10} INT NOT NULL DEFAULT 1)";
+					/***
+					 *
+					 * Table Pages
+					 *
+					 */
+					String creationPages = "CREATE TABLE IF NOT EXISTS {0} " +
+							"({1} INT PRIMARY KEY," +
+							"{2} INT NOT NULL," +
+							"{3} BLOB," +
+							"{4} BLOB," +
+							"{5} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP," +
+							"{6} INT NOT NULL DEFAULT 1," +
+							"{7} TINYINT(1) NULL DEFAULT 0," +
+							"{8} DOUBLE NULL," +
+							"{9} DOUBLE NULL," +
+							"{10} DOUBLE NULL," +
+							"{11} VARCHAR(100) NULL," +
+							"{12} INT NOT NULL DEFAULT 1)";
 
-                    db.execSQL(MessageFormat.format(creationPages, PagesTable.TABLE_NAME, PagesTable.PAGEID, PagesTable.DIARYID,
-                            PagesTable.PAGEDTCREATION, PagesTable.PAGENUMBER, PagesTable.PAGEBOOKMARK, PagesTable.PAGEALT,
-                            PagesTable.PAGELAT, PagesTable.PAGELONG, PagesTable.PAGELOC, PagesTable.PAGEORIENTATION));
-
-
-                    /***
-                     *
-                     * Table Rows
-                     *
-                     */
-                    String creationRows = "CREATE TABLE IF NOT EXISTS {0} " +
-                            "({1} INT NOT NULL," +
-                            "{2} INT NOT NULL," +
-                            "{3} INT NOT NULL," +
-                            "{4} TEXT NOT NULL," +
-                            "{5} INT NOT NULL DEFAULT 1," +
-                            "{6} INT NOT NULL DEFAULT 0,"+
-                            "{7} INT NOT NULL DEFAULT 0," +
-                            "PRIMARY KEY ( {1},{2},{3}))";
-
-                    db.execSQL(MessageFormat.format(creationRows, RowsTable.TABLE_NAME, RowsTable.ROWID, RowsTable.DIARYID,
-                            RowsTable.PAGEID, RowsTable.ROWTEXT, RowsTable.ROWNUMBER,RowsTable.ROWPOSX,RowsTable.ROWPOSY));
+					db.execSQL(MessageFormat.format(creationPages, PagesTable.TABLE_NAME, PagesTable.PAGEID, PagesTable.DIARYID,
+							PagesTable.PAGEPREVIEW, PagesTable.PAGEHANDWRITE, PagesTable.PAGEDTCREATION, PagesTable.PAGENUMBER, PagesTable.PAGEBOOKMARK, PagesTable.PAGEALT,
+							PagesTable.PAGELAT, PagesTable.PAGELONG, PagesTable.PAGELOC, PagesTable.PAGEORIENTATION));
 
 
-                    /***
-                     *
-                     * Table Picture
-                     *
-                     */
-                    String creationPicture = "CREATE TABLE IF NOT EXISTS {0} " +
-                            "({1} INT NOT NULL," +
-                            "{2} INT NOT NULL," +
-                            "{3} INT NOT NULL," +
-                            "{4} VARCHAR(100) NOT NULL," +
-                            "{5} INT NOT NULL," +
-                            "{6} INT NOT NULL," +
-                            "{7} DOUBLE NOT NULL DEFAULT 0," +
-                            "{8} INT NOT NULL DEFAULT 0," +
-                            "{9} INT NOT NULL DEFAULT 0," +
-                            "{10} TINYINT(1) NULL DEFAULT 0," +
-                            "PRIMARY KEY ( {1},{2},{3}))";
+					/***
+					 *
+					 * Table Rows
+					 *
+					 */
+					String creationRows = "CREATE TABLE IF NOT EXISTS {0} " +
+							"({1} INT NOT NULL," +
+							"{2} INT NOT NULL," +
+							"{3} INT NOT NULL," +
+							"{4} TEXT NOT NULL," +
+							"{5} INT NOT NULL DEFAULT 1," +
+							"{6} INT NOT NULL DEFAULT 0,"+
+							"{7} INT NOT NULL DEFAULT 0," +
+							"PRIMARY KEY ( {1},{2},{3}))";
 
-                    db.execSQL(MessageFormat.format(creationPicture, PictureTable.TABLE_NAME, PictureTable.PICTUREID, PictureTable.DIARYID, PictureTable.PAGEID,
-                            PictureTable.PICTUREURI, PictureTable.PICTUREH, PictureTable.PICTUREW, PictureTable.PICTUREROTATION,
-                            PictureTable.PICTUREX, PictureTable.PICTUREY,PictureTable.PICTUREHAND));
+					db.execSQL(MessageFormat.format(creationRows, RowsTable.TABLE_NAME, RowsTable.ROWID, RowsTable.DIARYID,
+							RowsTable.PAGEID, RowsTable.ROWTEXT, RowsTable.ROWNUMBER,RowsTable.ROWPOSX,RowsTable.ROWPOSY));
+
+
+					/***
+					 *
+					 * Table Picture
+					 *
+					 */
+					String creationPicture = "CREATE TABLE IF NOT EXISTS {0} " +
+							"({1} INT NOT NULL," +
+							"{2} INT NOT NULL," +
+							"{3} INT NOT NULL," +
+							"{4} BLOB," +
+							"{5} VARCHAR(100) NOT NULL," +
+							"{6} INT NOT NULL," +
+							"{7} INT NOT NULL," +
+							"{8} DOUBLE NOT NULL DEFAULT 0," +
+							"{9} INT NOT NULL DEFAULT 0," +
+							"{10} INT NOT NULL DEFAULT 0," +
+							"{11} TINYINT(1) NULL DEFAULT 0," +
+							"PRIMARY KEY ( {1},{2},{3}))";
+
+					db.execSQL(MessageFormat.format(creationPicture, PictureTable.TABLE_NAME, PictureTable.PICTUREID, PictureTable.DIARYID, PictureTable.PAGEID,
+							PictureTable.PICTUREPREVIEW,PictureTable.PICTUREURI, PictureTable.PICTUREH, PictureTable.PICTUREW, PictureTable.PICTUREROTATION,
+							PictureTable.PICTUREX, PictureTable.PICTUREY,PictureTable.PICTUREHAND));
+
+					/***
+					 *
+					 * Table PATH
+					 *
+					 */
+					String creationPaths = "CREATE TABLE IF NOT EXISTS {0} " +
+							"({1} INT NOT NULL," +
+							"{2} INT NOT NULL," +
+							"{3} INT NOT NULL," +
+							"{4} float NOT NULL DEFAULT 0," +
+							"{5} float NOT NULL DEFAULT 0," +
+							"{6} INT NOT NULL DEFAULT 0,"+
+							"{7} float NOT NULL DEFAULT 3)";
+
+					db.execSQL(MessageFormat.format(creationPaths, PathsTable.TABLE_NAME, PathsTable.PATHID, PathsTable.DIARYID,
+							PathsTable.PAGEID, PathsTable.PATHX, PathsTable.PATHY,PathsTable.PATHCOLOR,PathsTable.PATHSTROKEWIDTH));
 
                     String creationSearch = "CREATE VIRTUAL TABLE {0} USING FTS3" +
                             "({1} INT NOT NULL," +
@@ -441,7 +468,7 @@ public class DBAdapter {
 
             try {
                 DB_PATH=DB_PATH.replace("%PACKAGE%", mContext.getPackageName());
-                File fdb = new File(Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/db/"+DATABASE_NAME);
+                File fdb = new File(mContext.getFilesDir().getPath() + "/"+mContext.getPackageName()+"/db/"+DATABASE_NAME);
                 if(fdb.exists()){
                     int iDbLen = (int)fdb.length();
                     byte [] imgData = new byte[iDbLen];
@@ -454,9 +481,9 @@ public class DBAdapter {
                     f.close();
                     if(fdb.delete()){
                         //Cancello il file di journal se presente
-                        fdb = new File(Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/db/"+DATABASE_NAME+"-journal");
+                        fdb = new File(mContext.getFilesDir().getPath() + "/"+mContext.getPackageName()+"/db/"+DATABASE_NAME+"-journal");
                         fdb.delete();
-                        File fdbFolder = new File(Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/db");
+                        File fdbFolder = new File(mContext.getFilesDir().getPath() + "/"+mContext.getPackageName()+"/db");
                         nResult= fdbFolder.delete();
                     }
                 }

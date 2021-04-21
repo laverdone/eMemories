@@ -76,7 +76,7 @@ import com.glm.utilities.InputConnetionEM;
 /**
  *
  * @author Moritz 'Moss' Wundke (b.thax.dcg@gmail.com)
- *
+ * @deprecated
  */
 public class PageCurlView extends TextureView implements TextureView.SurfaceTextureListener,
         GestureDetector.OnGestureListener {
@@ -1239,7 +1239,8 @@ public class PageCurlView extends TextureView implements TextureView.SurfaceText
 
         if(mCurrentDiary!=null && mContext!=null && mCurrentPage!=null){
             //le vecchie path da usare in un task async
-            Bitmap immutable = BitmapFactoryHelper.decodeSampledBitmapFromFile(Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + mCurrentDiary.getDiaryID() + "/Pictures/h" + mCurrentPage.getPageID() + Const.PAGE_PREVIEW_EXT, 1);
+            Bitmap immutable = BitmapFactory.decodeByteArray(mCurrentPage.getByteImageHW(), 0, mCurrentPage.getByteImageHW().length);
+                    //BitmapFactoryHelper.decodeSampledBitmapFromFile(Environment.getExternalStorageDirectory().getPath() + "/" + mContext.getPackageName() + "/" + mCurrentDiary.getDiaryID() + "/Pictures/h" + mCurrentPage.getPageID() + Const.PAGE_PREVIEW_EXT, 1);
             if(immutable!=null){
                 bmpPath = immutable.copy(Bitmap.Config.ARGB_8888, true);
                 immutable.recycle();
@@ -1349,7 +1350,8 @@ public class PageCurlView extends TextureView implements TextureView.SurfaceText
 
             if(mCurrentDiary!=null && mContext!=null && mCurrentPage!=null){
                 //le vecchie path da usare in un task async
-                Bitmap immutable = BitmapFactoryHelper.decodeSampledBitmapFromFile(Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/"+mCurrentDiary.getDiaryID() + "/Pictures/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT,1);
+                Bitmap immutable = BitmapFactory.decodeByteArray(mCurrentPage.getByteImageHW(), 0, mCurrentPage.getByteImageHW().length);
+                //Bitmap immutable = BitmapFactoryHelper.decodeSampledBitmapFromFile(Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/"+mCurrentDiary.getDiaryID() + "/Pictures/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT,1);
                 if(immutable!=null){
                     if(bmpPath!=null) bmpPath.recycle();
                     bmpPath = immutable.copy(Bitmap.Config.ARGB_8888, true);
@@ -1524,7 +1526,8 @@ public class PageCurlView extends TextureView implements TextureView.SurfaceText
 				}
 			}*/
             //le vecchie path da usare in un task async
-            Bitmap immutable = BitmapFactoryHelper.decodeSampledBitmapFromFile(Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/"+mCurrentDiary.getDiaryID() + "/Pictures/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT,1);
+            Bitmap immutable = BitmapFactory.decodeByteArray(mCurrentPage.getByteImageHW(), 0, mCurrentPage.getByteImageHW().length);
+            //Bitmap immutable = BitmapFactoryHelper.decodeSampledBitmapFromFile(Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/"+mCurrentDiary.getDiaryID() + "/Pictures/h"+mCurrentPage.getPageID()+Const.PAGE_PREVIEW_EXT,1);
             if(immutable!=null){
                 if(bmpPath!=null) bmpPath.recycle();
                 bmpPath = immutable.copy(Bitmap.Config.ARGB_8888, true);
@@ -1556,13 +1559,13 @@ public class PageCurlView extends TextureView implements TextureView.SurfaceText
      * Applica il template selezionato
      *
      *
-     * */
+     *
     public void applyPaperPreview(Page page) {
         String sPathImage=Environment.getExternalStorageDirectory().getPath() + "/"+mContext.getPackageName()+"/"+page.getDiaryID() + "/Pictures";
         Bitmap preview = BitmapFactoryHelper.decodeSampledBitmapFromFile(sPathImage + "/" + page.getPageID() + Const.CAMERA_PREVIEW_EXT, 1); //BitmapFactory.decodeFile(sPathImage+"/"+page.getPageID()+Const.PAGE_PREVIEW_EXT);
         setImagePage(preview);
         preview=null;
-    }
+    }*/
 
     /**
      * Applica il template selezionato
@@ -2620,10 +2623,10 @@ public class PageCurlView extends TextureView implements TextureView.SurfaceText
         mPages = new ArrayList<Bitmap>();
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize=Const.SAMPLESIZEDIARY;
-        Log.v(this.getClass().getCanonicalName(),"load page preview: "+sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
+        //Log.v(this.getClass().getCanonicalName(),"load page preview: "+sPathImage+"/"+mCurrentPage.getPageID()+Const.CAMERA_PREVIEW_EXT);
 
-        mPages.add(BitmapFactory.decodeFile(sPathImage + "/" + mCurrentPage.getPageID() + Const.CAMERA_PREVIEW_EXT, options));
-        mPages.add(BitmapFactory.decodeFile(sPathImage + "/" + mCurrentPage.getPageID() + Const.CAMERA_PREVIEW_EXT, options));
+        //mPages.add(BitmapFactory.decodeFile(sPathImage + "/" + mCurrentPage.getPageID() + Const.CAMERA_PREVIEW_EXT, options));
+        //mPages.add(BitmapFactory.decodeFile(sPathImage + "/" + mCurrentPage.getPageID() + Const.CAMERA_PREVIEW_EXT, options));
 
         // Create some sample images
         mForeground = mPages.get(0);

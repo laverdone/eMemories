@@ -14,6 +14,9 @@ public class Page implements Serializable {
 	
 	private long PageID;
 	private long DiaryID;
+	private byte[] byteImageHW;
+	private byte[] byteImagePreviewPage;
+
 	private Date PageDTCreation;
 	private int PageNumber;
 	private Hashtable<Long, Row> PageRows;
@@ -183,5 +186,29 @@ public class Page implements Serializable {
 	public synchronized void setPageOrientation(int pageOrientation) {
 		PageOrientation = pageOrientation;
 	}
-	
+	/**
+	 * @return byteImageHW the Hand Write byte[]
+	 */
+	public byte[] getByteImageHW() {
+		return byteImageHW;
+	}
+	/**
+	 * @param byteImageHW the Hand Write byte[] to set
+	 */
+	public void setByteImageHW(byte[] byteImageHW) {
+		this.byteImageHW = byteImageHW;
+	}
+
+	/**
+	 * @return byteImagePreviewPage the Hand Write byte[]
+	 */
+	public byte[] getByteImagePreviewPage() {
+		return byteImagePreviewPage;
+	}
+	/**
+	 * @param byteImagePreviewPage the Hand Write byte[] to set
+	 */
+	public void setByteImagePreviewPage(byte[] byteImagePreviewPage) {
+		this.byteImagePreviewPage = byteImagePreviewPage;
+	}
 }
